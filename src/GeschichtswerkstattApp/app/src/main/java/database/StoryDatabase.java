@@ -1,10 +1,12 @@
 package database;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import java.text.Normalizer;
 import java.util.ArrayList;
@@ -35,26 +37,32 @@ public class StoryDatabase extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public synchronized void insertStory(SQLiteDatabase db,String title) {
+    public synchronized Long insertStory(SQLiteDatabase db,String title) {
 
-        String query = "INSERT INTO "+StoryContract.StoryEntry.TABLE+" " +
-                "("+ StoryContract.StoryEntry.COL_TITLE+") VALUES ("+escape(title)+")";
-        //insert data
-        Cursor cursor = db.rawQuery(query, null);
-        cursor.moveToFirst();
-        cursor.close();
+        ContentValues insertValues = new ContentValues();
+        insertValues.put(StoryContract.StoryEntry.COL_TITLE, title);
+
+        long id = db.insert(StoryContract.StoryEntry.TABLE, null, insertValues);
+        return id;
+    }
+
+    public synchronized Cursor getStory(SQLiteDatabase db, long id) {
+
+        Cursor cursor = db.rawQuery("SELECT * FROM " + StoryContract.StoryEntry.TABLE +
+                " WHERE " + StoryContract.StoryEntry._ID + "=" + Long.toString(id), null);
+        return cursor;
     }
 
     public synchronized Cursor getAllStories(SQLiteDatabase db) {
 
-        Cursor cursor = db.rawQuery("SELECT * FROM "+ StoryContract.StoryEntry.TABLE,null);
+        Cursor cursor = db.rawQuery("SELECT * FROM "+ StoryContract.StoryEntry.TABLE, null);
         return cursor;
     }
 
-    public synchronized void deleteStory(SQLiteDatabase db,int id) {
+    public synchronized void deleteStory(SQLiteDatabase db,long id) {
 
         db.delete(StoryContract.StoryEntry.TABLE,
-            StoryContract.StoryEntry._ID + " = ?", new String[]{Integer.toString(id)});
+            StoryContract.StoryEntry._ID + " = ?", new String[]{Long.toString(id)});
     }
 
 

@@ -2,10 +2,10 @@ package com.drl.brandis.geschichtswerkstatt.activities;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.database.Cursor;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,7 +18,7 @@ import adapters.StoryAdapter;
 import database.Story;
 import database.StoryDatabase;
 
-public class StoryListActivity extends AppCompatActivity {
+public class StoryListActivity extends BaseActivity {
 
     private static final String LOG_TAG = "StoryListActivity";
 
@@ -79,10 +79,19 @@ public class StoryListActivity extends AppCompatActivity {
                 EditText textEdit = (EditText) contentView.findViewById(R.id.editTextTitle);
 
                 // add to database
-                database.insertStory(database.getWritableDatabase(), textEdit.getText().toString());
+                Long id = database.insertStory(database.getWritableDatabase(), textEdit.getText().toString());
                 database.close();
 
                 updateUi();
+
+                Cursor cursor = database.getStory(database.getReadableDatabase(), id);
+                cursor.moveToFirst();
+                Story story = new Story(cursor);
+
+                //start recorder activity
+                Intent intent = new Intent(getApplicationContext(), RecorderActivity.class);
+                intent.putExtra("story", story);
+                startActivity(intent);
             }
         });
         dialog.setNegativeButton("Cancel", null);
