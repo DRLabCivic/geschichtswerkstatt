@@ -15,13 +15,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.drl.brandis.geschichtswerkstatt.R;
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.location.places.ui.PlacePicker;
 
 import database.Story;
 import database.StoryDatabase;
 
-public class StoryActivity extends AppCompatActivity {
+public class StoryActivity extends BaseActivity {
 
     public static int RECORD_REQUEST_CODE = 1;
+    public static int PLACE_PICKER_REQUEST_CODE = 2;
 
     Story story;
     TextView titleEdit;
@@ -94,6 +98,15 @@ public class StoryActivity extends AppCompatActivity {
     }
 
     public void onLocationButtonClicked(View view) {
+
+        PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
+        try {
+            startActivityForResult(builder.build(this), PLACE_PICKER_REQUEST_CODE);
+        } catch (GooglePlayServicesRepairableException e) {
+            showAlert("Error",e.getMessage());
+        } catch (GooglePlayServicesNotAvailableException e) {
+            showAlert("Error",e.getMessage());
+        }
 
     }
 
