@@ -25,6 +25,7 @@ public class StoryDatabase extends SQLiteOpenHelper {
         String createTable = "CREATE TABLE " + StoryContract.StoryEntry.TABLE + " ( " +
                 StoryContract.StoryEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 StoryContract.StoryEntry.COL_TITLE + " TEXT NOT NULL," +
+                StoryContract.StoryEntry.COL_TEXT + " TEXT," +
                 StoryContract.StoryEntry.COL_DATE + " DEFAULT CURRENT_TIMESTAMP NOT NULL" +
                 ");";
 
@@ -37,20 +38,27 @@ public class StoryDatabase extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public synchronized Long insertStory(SQLiteDatabase db,String title) {
+    public synchronized Long upsertStory(SQLiteDatabase db, Story story) {
 
         ContentValues insertValues = new ContentValues();
-        insertValues.put(StoryContract.StoryEntry.COL_TITLE, title);
+        insertValues.put(StoryContract.StoryEntry.COL_TITLE, story.title);
+        insertValues.put(StoryContract.StoryEntry.COL_TEXT, story.text);
 
-        long id = db.insert(StoryContract.StoryEntry.TABLE, null, insertValues);
-        return id;
+        if (story._id < 0)
+            story._id = db.insert(StoryContract.StoryEntry.TABLE, null, insertValues);
+        else
+            db.update(StoryContract.StoryEntry.TABLE,insertValues, StoryContract.StoryEntry._ID + "=" + story._id, null);
+
+        return story._id;
     }
 
-    public synchronized Cursor getStory(SQLiteDatabase db, long id) {
+    public synchronized Story getStory(SQLiteDatabase db, long id) {
 
         Cursor cursor = db.rawQuery("SELECT * FROM " + StoryContract.StoryEntry.TABLE +
                 " WHERE " + StoryContract.StoryEntry._ID + "=" + Long.toString(id), null);
-        return cursor;
+        cursor.moveToFirst();
+
+        return new Story(cursor);
     }
 
     public synchronized Cursor getAllStories(SQLiteDatabase db) {

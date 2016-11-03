@@ -25,8 +25,6 @@ public class RecorderActivity extends BaseActivity {
 
     SoundRecorder recorder;
 
-    Story story;
-
     public enum RecorderState {
         INIT, RECORDING, STOPPED
     }
@@ -35,11 +33,6 @@ public class RecorderActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recorder);
-
-        if (getIntent().hasExtra("story"))
-            story = (Story) getIntent().getSerializableExtra("story");
-        else
-            story = new Story();
 
         // init soundrecorder
         recorder = new SoundRecorderWav(getApplicationContext());
@@ -76,12 +69,11 @@ public class RecorderActivity extends BaseActivity {
         try {
             recorder.prepare();
             recorder.startRecording();
+            state = RecorderState.RECORDING;
         } catch (Exception e) {
             showAlert("Error", e.getMessage());
             stopRecording();
         }
-
-        state = RecorderState.RECORDING;
 
         updateUi();
     }
@@ -96,10 +88,10 @@ public class RecorderActivity extends BaseActivity {
 
         try {
             recorder.stopRecording();
+            state = RecorderState.STOPPED;
         } catch (IOException e) {
             showAlert("Error", e.getMessage());
         }
-        state = RecorderState.STOPPED;
 
         updateUi();
     }
@@ -108,10 +100,10 @@ public class RecorderActivity extends BaseActivity {
 
         try {
             recorder.reset();
+            state = RecorderState.INIT;
         } catch (IOException e) {
             showAlert("Error", e.getMessage());
         }
-        state = RecorderState.INIT;
 
         updateUi();
     }
@@ -122,6 +114,7 @@ public class RecorderActivity extends BaseActivity {
 
         try {
             file = recorder.save();
+            recorder.reset();
         } catch (Exception e) {
             showAlert("Error",e.getMessage());
         }

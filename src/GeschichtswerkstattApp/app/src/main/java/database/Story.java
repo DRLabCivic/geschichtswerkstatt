@@ -20,11 +20,12 @@ public class Story implements Serializable {
     public File imageFile;
 
     public Story() {
-
+        _id = -1;
     }
 
     public Story(Cursor cursor) {
         _id = cursor.getLong(cursor.getColumnIndex(StoryContract.StoryEntry._ID));
         title = cursor.getString(cursor.getColumnIndex(StoryContract.StoryEntry.COL_TITLE));
+        text = cursor.getString(cursor.getColumnIndex(StoryContract.StoryEntry.COL_TEXT));
     }
 }

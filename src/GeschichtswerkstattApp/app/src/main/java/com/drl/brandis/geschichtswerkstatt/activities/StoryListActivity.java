@@ -1,15 +1,14 @@
 package com.drl.brandis.geschichtswerkstatt.activities;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.os.Bundle;
-import android.view.LayoutInflater;
+import android.support.v4.app.NavUtils;
+import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.EditText;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.drl.brandis.geschichtswerkstatt.R;
@@ -33,9 +32,20 @@ public class StoryListActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_story_list);
 
+        // setup action bar
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         database = new StoryDatabase(getApplicationContext());
 
         storyListView = (ListView) findViewById(R.id.storyList);
+        storyListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                onListItemClicked(parent,view,position,id);
+            }
+        });
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -45,6 +55,12 @@ public class StoryListActivity extends BaseActivity {
             }
         });
 
+        updateUi();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
         updateUi();
     }
 
@@ -67,47 +83,27 @@ public class StoryListActivity extends BaseActivity {
 
     public void onFabButtonClicked(final View view) {
 
-        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-        LayoutInflater inflater = this.getLayoutInflater();
-        final View contentView = inflater.inflate(R.layout.dialog_storytitle, null);
-        dialog.setView(contentView);
-        dialog.setPositiveButton("Add", new DialogInterface.OnClickListener() {
-
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-                EditText textEdit = (EditText) contentView.findViewById(R.id.editTextTitle);
-
-                // add to database
-                Long id = database.insertStory(database.getWritableDatabase(), textEdit.getText().toString());
-                database.close();
-
-                updateUi();
-
-                Cursor cursor = database.getStory(database.getReadableDatabase(), id);
-                cursor.moveToFirst();
-                Story story = new Story(cursor);
-
-                //start recorder activity
-                Intent intent = new Intent(getApplicationContext(), RecorderActivity.class);
-                intent.putExtra("story", story);
-                startActivity(intent);
-            }
-        });
-        dialog.setNegativeButton("Cancel", null);
-        dialog.create();
-        dialog.show();
+        Intent intent = new Intent(getApplicationContext(), StoryActivity.class);
+        startActivity(intent);
     }
 
-    public void onItemDeleteButtonClicked(View view) {
-        View parent = (View) view.getParent();
-        Story story = (Story) parent.getTag();
+    public void onListItemClicked(AdapterView<?> parent, View view, int position, long id) {
 
-        Snackbar.make(view, "Story "+story.title+" deleted.", Snackbar.LENGTH_LONG)
-            .setAction("Action", null).show();
+        Story story = (Story) view.getTag();
 
-        database.deleteStory(database.getWritableDatabase(), story._id);
+        Intent intent = new Intent(getApplicationContext(), StoryActivity.class);
+        intent.putExtra("story", story);
+        startActivity(intent);
+    }
 
-        updateUi();
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            // Respond to the action bar's Up/Home button
+            case android.R.id.home:
+                NavUtils.navigateUpFromSameTask(this);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

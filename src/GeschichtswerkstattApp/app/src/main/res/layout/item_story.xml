@@ -4,17 +4,16 @@
 
     <TextView
         android:id="@+id/story_title"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignLeft="@+id/story_delete"
-        android:text="Title"
         android:layout_alignParentTop="true"
-        android:layout_toStartOf="@+id/story_delete"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:text="Title"
         android:layout_margin="@dimen/spacing"/>
 
-    <Button
+    <!--<Button
         android:id="@+id/story_delete"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -22,6 +21,6 @@
         android:layout_alignParentRight="true"
         android:text="Delete"
         android:onClick="onItemDeleteButtonClicked"
-        android:layout_marginRight="@dimen/spacing"/>
+        android:layout_marginRight="@dimen/spacing"/>-->
 
 </RelativeLayout>
