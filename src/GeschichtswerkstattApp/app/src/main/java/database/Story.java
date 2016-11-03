@@ -14,10 +14,14 @@ public class Story implements Serializable {
     public String title;
     public String text;
     public String date;
-    public String location;
+
+    // location
+    public Double loc_latitude;
+    public Double loc_longitude;
+    public String loc_name;
 
     public File audioFile;
-    public File imageFile;
+    public String imageFile;
 
     public Story() {
         _id = -1;
@@ -27,5 +31,9 @@ public class Story implements Serializable {
         _id = cursor.getLong(cursor.getColumnIndex(StoryContract.StoryEntry._ID));
         title = cursor.getString(cursor.getColumnIndex(StoryContract.StoryEntry.COL_TITLE));
         text = cursor.getString(cursor.getColumnIndex(StoryContract.StoryEntry.COL_TEXT));
+        imageFile = cursor.getString(cursor.getColumnIndex(StoryContract.StoryEntry.COL_IMAGE));
+        loc_longitude = cursor.getDouble(cursor.getColumnIndex(StoryContract.StoryEntry.COL_LOCATION_LONG));
+        loc_latitude = cursor.getDouble(cursor.getColumnIndex(StoryContract.StoryEntry.COL_LOCATION_LAT));
+        loc_name = cursor.getString(cursor.getColumnIndex(StoryContract.StoryEntry.COL_LOCATION_NAME));
     }
 }

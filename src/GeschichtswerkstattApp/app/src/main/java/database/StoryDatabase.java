@@ -26,6 +26,10 @@ public class StoryDatabase extends SQLiteOpenHelper {
                 StoryContract.StoryEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 StoryContract.StoryEntry.COL_TITLE + " TEXT NOT NULL," +
                 StoryContract.StoryEntry.COL_TEXT + " TEXT," +
+                StoryContract.StoryEntry.COL_LOCATION_LAT + " REAL, " +
+                StoryContract.StoryEntry.COL_LOCATION_LONG + " REAL, " +
+                StoryContract.StoryEntry.COL_LOCATION_NAME + " TEXT, " +
+                StoryContract.StoryEntry.COL_IMAGE + " TEXT ," +
                 StoryContract.StoryEntry.COL_DATE + " DEFAULT CURRENT_TIMESTAMP NOT NULL" +
                 ");";
 
@@ -43,6 +47,10 @@ public class StoryDatabase extends SQLiteOpenHelper {
         ContentValues insertValues = new ContentValues();
         insertValues.put(StoryContract.StoryEntry.COL_TITLE, story.title);
         insertValues.put(StoryContract.StoryEntry.COL_TEXT, story.text);
+        insertValues.put(StoryContract.StoryEntry.COL_LOCATION_LAT, story.loc_latitude);
+        insertValues.put(StoryContract.StoryEntry.COL_LOCATION_LAT, story.loc_longitude);
+        insertValues.put(StoryContract.StoryEntry.COL_LOCATION_NAME, story.loc_name);
+        insertValues.put(StoryContract.StoryEntry.COL_IMAGE, story.imageFile);
 
         if (story._id < 0)
             story._id = db.insert(StoryContract.StoryEntry.TABLE, null, insertValues);

@@ -40,7 +40,8 @@ public class StoryAdapter extends CursorAdapter {
         TextView titleView = (TextView) view.findViewById(R.id.story_title);
 
         // Populate fields with properties
-        titleView.setText(story.title);
+        if (story.title != null)
+            titleView.setText(story.title);
 
         //set model to view
         view.setTag(story);
