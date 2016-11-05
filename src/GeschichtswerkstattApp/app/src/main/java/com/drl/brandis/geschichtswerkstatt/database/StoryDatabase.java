@@ -25,7 +25,7 @@ public class StoryDatabase extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         String createTable = "CREATE TABLE " + StoryContract.StoryEntry.TABLE + " ( " +
                 StoryContract.StoryEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                StoryContract.StoryEntry.COL_TITLE + " TEXT NOT NULL," +
+                StoryContract.StoryEntry.COL_TITLE + " TEXT," +
                 StoryContract.StoryEntry.COL_TEXT + " TEXT," +
                 StoryContract.StoryEntry.COL_LOCATION_LAT + " REAL, " +
                 StoryContract.StoryEntry.COL_LOCATION_LONG + " REAL, " +
@@ -50,7 +50,7 @@ public class StoryDatabase extends SQLiteOpenHelper {
         insertValues.put(StoryContract.StoryEntry.COL_TITLE, story.title);
         insertValues.put(StoryContract.StoryEntry.COL_TEXT, story.text);
         insertValues.put(StoryContract.StoryEntry.COL_LOCATION_LAT, story.loc_latitude);
-        insertValues.put(StoryContract.StoryEntry.COL_LOCATION_LAT, story.loc_longitude);
+        insertValues.put(StoryContract.StoryEntry.COL_LOCATION_LONG, story.loc_longitude);
         insertValues.put(StoryContract.StoryEntry.COL_LOCATION_NAME, story.loc_name);
         insertValues.put(StoryContract.StoryEntry.COL_IMAGE, story.imageFile);
         insertValues.put(StoryContract.StoryEntry.COL_AUDIOFILE, story.audioFile);

@@ -14,6 +14,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 
 /**
  * Created by lutz on 13/04/15.
@@ -23,10 +25,12 @@ import java.io.RandomAccessFile;
  */
 public class SoundRecorderWav extends SoundRecorder {
 
+    private static final String LOG_TAG = "WAV_RECORDER";
+
     private static final String AUDIO_RECORDER_FILE_EXT_WAV = ".wav";
     private static final String AUDIO_RECORDER_FOLDER = "AudioRecorder";
     private static final String AUDIO_RECORDER_TEMP_FILE = "record_temp.wav";
-    private static final int RECORDER_SAMPLERATE = 44100;
+
     private static final int RECORDER_CHANNELS = AudioFormat.CHANNEL_IN_MONO;
     private static final int RECORDER_AUDIO_ENCODING = AudioFormat.ENCODING_PCM_16BIT;
 
@@ -39,6 +43,7 @@ public class SoundRecorderWav extends SoundRecorder {
 
     // Buffer for output
     private byte[] buffer;
+    private int sampleRate;
 
     // File writer
     private RandomAccessFile randomAccessWriter;
@@ -49,8 +54,16 @@ public class SoundRecorderWav extends SoundRecorder {
     public SoundRecorderWav(Context context) {
         super(context);
 
-        bufferSize = AudioRecord.getMinBufferSize(RECORDER_SAMPLERATE,RECORDER_CHANNELS,RECORDER_AUDIO_ENCODING);
+        ArrayList<Integer> validRates = getValidSampleRates();
+        if (validRates.isEmpty())
+            sampleRate = 8000; //set to lowest
+        else
+            sampleRate = validRates.get(validRates.size() -1);
+
+        bufferSize = AudioRecord.getMinBufferSize(sampleRate,RECORDER_CHANNELS,RECORDER_AUDIO_ENCODING);
         audioData = new short[bufferSize];
+
+        Log.e(LOG_TAG,"Recorder initialized with sample rate:"+ sampleRate + ", buffer size:"+ bufferSize);
     }
 
     @Override
@@ -65,7 +78,7 @@ public class SoundRecorderWav extends SoundRecorder {
 
     @Override
     public void startRecording() throws IOException {
-        recorder = new AudioRecord(MediaRecorder.AudioSource.MIC,RECORDER_SAMPLERATE,
+        recorder = new AudioRecord(MediaRecorder.AudioSource.MIC,sampleRate,
                 RECORDER_CHANNELS,RECORDER_AUDIO_ENCODING, bufferSize);
 
         int state = recorder.getState();
@@ -77,18 +90,14 @@ public class SoundRecorderWav extends SoundRecorder {
         recordingThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                try {
-                    writeAudioDataToFile(randomAccessWriter);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                writeAudioDataToFile(randomAccessWriter);
             }
         },"AudioRecorder Thread");
         recordingThread.start();
     }
 
     @Override
-    public void stopRecording() throws IOException {
+    public void stopRecording() {
         if (recorder != null) {
             isRecording = false;
 
@@ -101,12 +110,16 @@ public class SoundRecorderWav extends SoundRecorder {
             recorder = null;
             recordingThread = null;
 
-            writeWavSizeToHeader(randomAccessWriter);
+            try {
+                writeWavSizeToHeader(randomAccessWriter);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
     @Override
-    public void reset() throws IOException {
+    public void reset() {
         stopRecording();
         deleteTempFile();
     }
@@ -120,18 +133,14 @@ public class SoundRecorderWav extends SoundRecorder {
 
         Log.e("RECORDER","Recording saved to "+output.getAbsolutePath().toString());
 
-        copyFile(getTempFile(),output);
+        copyFile(getTempFile(), output);
         deleteTempFile();
         return output;
     }
 
     @Override
     public void release() {
-        try {
-            reset();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        reset();
     }
 
     private File getTempFile() {
@@ -164,7 +173,9 @@ public class SoundRecorderWav extends SoundRecorder {
         return storageDir;
     }
 
-    private void writeAudioDataToFile(RandomAccessFile fileWriter) throws IOException {
+    private void writeAudioDataToFile(RandomAccessFile fileWriter){
+
+        long i = 0;
 
         while (isRecording) {
 
@@ -172,11 +183,20 @@ public class SoundRecorderWav extends SoundRecorder {
             recorder.read(buffer, 0, buffer.length);
 
             // write buffer to file
-            fileWriter.write(buffer);
+            try {
+                fileWriter.write(buffer);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
             bytesRecorded += buffer.length;
 
+            i++;
         }
+
+        Log.e(LOG_TAG, "Recorded " + bytesRecorded + " bytes");
+
+
     }
 
     private void deleteTempFile() {
@@ -201,7 +221,7 @@ public class SoundRecorderWav extends SoundRecorder {
             nChannels = 2;
         }
 
-        int sRate = RECORDER_SAMPLERATE;
+        int sRate = sampleRate;
 
         fileWriter.setLength(0); // Set file length to 0, to prevent unexpected behavior in case the file already existed
         fileWriter.writeBytes("RIFF");
@@ -220,7 +240,7 @@ public class SoundRecorderWav extends SoundRecorder {
     }
 
 
-    private void writeWavSizeToHeader(RandomAccessFile fileWriter) throws IOException {
+    private void writeWavSizeToHeader(RandomAccessFile fileWriter) throws Exception {
 
         fileWriter.seek(4); // Write size to RIFF header
         fileWriter.writeInt(Integer.reverseBytes(36 + bytesRecorded));
@@ -229,5 +249,21 @@ public class SoundRecorderWav extends SoundRecorder {
         fileWriter.writeInt(Integer.reverseBytes(bytesRecorded));
 
         fileWriter.close();
+    }
+
+    public ArrayList<Integer> getValidSampleRates() {
+
+        int sampleRates[] = {8000, 11025, 16000, 22050, 44100};
+        //int sampleRates[] = {8000, 11025, 16000};
+
+        ArrayList<Integer> passedRates =new ArrayList<Integer>();
+
+        for (int rate : sampleRates) {  // add the rates you wish to check against
+            int bufferSize = AudioRecord.getMinBufferSize(rate, RECORDER_CHANNELS , RECORDER_AUDIO_ENCODING);
+            if (bufferSize > 0) {
+                passedRates.add(rate);
+            }
+        }
+        return passedRates;
     }
 }

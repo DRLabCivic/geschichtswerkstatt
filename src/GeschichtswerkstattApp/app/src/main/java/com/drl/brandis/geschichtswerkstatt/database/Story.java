@@ -24,6 +24,7 @@ public class Story implements Serializable {
     public String imageFile;
 
     public Story() {
+
         _id = -1;
     }
 

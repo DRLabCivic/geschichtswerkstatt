@@ -56,7 +56,7 @@ public class StoryUploader {
             @Part("text") RequestBody text,
             @Part("zeit") RequestBody date,
             @Part("lat") RequestBody latitude,
-            @Part("long") RequestBody longtitude,
+            @Part("lng") RequestBody longitude,
             @Part MultipartBody.Part recording,
             @Part MultipartBody.Part image);
     }
@@ -83,8 +83,8 @@ public class StoryUploader {
         RequestBody title = createPartFromString(story.title == null ? "" : story.title);
         RequestBody text = createPartFromString(story.text == null ? "" : story.text);
         RequestBody date = createPartFromString(story.date == null ? "" : formatDate(story.date));
-        RequestBody latitude = createPartFromString(story.loc_name == null ? "" : story.loc_latitude.toString());
-        RequestBody longitude = createPartFromString(story.loc_name == null ? "" : story.loc_longitude.toString());
+        RequestBody latitude = createPartFromString(story.loc_name == null ? "" : Double.toString(story.loc_latitude));
+        RequestBody longitude = createPartFromString(story.loc_name == null ? "" : Double.toString(story.loc_longitude));
 
         // execute the request
         Call<ResponseBody> call = service.uploadRecordingAndImage(title, text, date, latitude, longitude, audioFile, imageFile);

@@ -9,7 +9,7 @@ import android.provider.BaseColumns;
 public class StoryContract {
 
     public static final String DB_NAME = "com.drl.brandis.geschichtswerkstatt.db";
-    public static final int DB_VERSION = 7;
+    public static final int DB_VERSION = 11;
 
     public class StoryEntry implements BaseColumns {
 

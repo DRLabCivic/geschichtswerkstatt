@@ -27,6 +27,11 @@ public class BaseActivity extends AppCompatActivity {
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE
     };
+    // Record Permissions
+    protected static final int REQUEST_AUDIO_RECORD = 2;
+    protected static String[] PERMISSIONS_AUDIO_RECORD = {
+            Manifest.permission.RECORD_AUDIO
+    };
 
     public void showOverlay(String text, ViewGroup parent) {
         LayoutInflater inflater = this.getLayoutInflater();
@@ -69,7 +74,15 @@ public class BaseActivity extends AppCompatActivity {
                 }
                 return;
             }
-
+            case REQUEST_AUDIO_RECORD: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                } else {
+                    showAlert("Error","This app requires to record audio files.");
+                    finish();
+                }
+                return;
+            }
         }
     }
 
