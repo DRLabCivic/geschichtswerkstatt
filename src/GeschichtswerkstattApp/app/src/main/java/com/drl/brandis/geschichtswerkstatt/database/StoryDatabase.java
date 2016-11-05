@@ -1,4 +1,4 @@
-package database;
+package com.drl.brandis.geschichtswerkstatt.database;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import java.io.File;
 import java.text.Normalizer;
 import java.util.ArrayList;
 
@@ -30,6 +31,7 @@ public class StoryDatabase extends SQLiteOpenHelper {
                 StoryContract.StoryEntry.COL_LOCATION_LONG + " REAL, " +
                 StoryContract.StoryEntry.COL_LOCATION_NAME + " TEXT, " +
                 StoryContract.StoryEntry.COL_IMAGE + " TEXT ," +
+                StoryContract.StoryEntry.COL_AUDIOFILE + " TEXT ," +
                 StoryContract.StoryEntry.COL_DATE + " DEFAULT CURRENT_TIMESTAMP NOT NULL" +
                 ");";
 
@@ -51,6 +53,7 @@ public class StoryDatabase extends SQLiteOpenHelper {
         insertValues.put(StoryContract.StoryEntry.COL_LOCATION_LAT, story.loc_longitude);
         insertValues.put(StoryContract.StoryEntry.COL_LOCATION_NAME, story.loc_name);
         insertValues.put(StoryContract.StoryEntry.COL_IMAGE, story.imageFile);
+        insertValues.put(StoryContract.StoryEntry.COL_AUDIOFILE, story.audioFile);
 
         if (story._id < 0)
             story._id = db.insert(StoryContract.StoryEntry.TABLE, null, insertValues);
@@ -75,15 +78,22 @@ public class StoryDatabase extends SQLiteOpenHelper {
         return cursor;
     }
 
-    public synchronized void deleteStory(SQLiteDatabase db,long id) {
+    public synchronized void deleteStory(SQLiteDatabase db, Story story) {
+
+        //delete audio file
+        if (story.audioFile != null) {
+            File file = new File(story.audioFile);
+            if (file.exists())
+                file.delete();
+        }
 
         db.delete(StoryContract.StoryEntry.TABLE,
-            StoryContract.StoryEntry._ID + " = ?", new String[]{Long.toString(id)});
+            StoryContract.StoryEntry._ID + " = ?", new String[]{Long.toString(story._id)});
     }
 
-
-
     static public String escape(String str) {
+        if (str == null)
+            return null;
         str = Normalizer.normalize(str, Normalizer.Form.NFD);
         return DatabaseUtils.sqlEscapeString(str);
     }

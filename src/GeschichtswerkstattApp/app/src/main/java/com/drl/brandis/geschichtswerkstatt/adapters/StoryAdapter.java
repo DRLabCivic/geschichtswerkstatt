@@ -1,4 +1,4 @@
-package adapters;
+package com.drl.brandis.geschichtswerkstatt.adapters;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -10,8 +10,7 @@ import android.widget.TextView;
 
 import com.drl.brandis.geschichtswerkstatt.R;
 
-import database.Story;
-import database.StoryContract;
+import com.drl.brandis.geschichtswerkstatt.database.Story;
 
 /**
  * Created by lutz on 02/11/16.

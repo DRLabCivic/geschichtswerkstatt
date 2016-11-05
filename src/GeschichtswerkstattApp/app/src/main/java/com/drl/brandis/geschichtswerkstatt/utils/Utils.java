@@ -1,4 +1,4 @@
-package utils;
+package com.drl.brandis.geschichtswerkstatt.utils;
 
 import android.graphics.Bitmap;
 

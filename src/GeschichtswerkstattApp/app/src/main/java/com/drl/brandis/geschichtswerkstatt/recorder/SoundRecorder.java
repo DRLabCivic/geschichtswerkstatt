@@ -1,4 +1,4 @@
-package recorder;
+package com.drl.brandis.geschichtswerkstatt.recorder;
 
 import android.content.Context;
 

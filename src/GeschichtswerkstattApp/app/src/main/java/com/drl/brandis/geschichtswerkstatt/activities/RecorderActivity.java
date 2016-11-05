@@ -1,8 +1,14 @@
 package com.drl.brandis.geschichtswerkstatt.activities;
 
+import android.Manifest;
+import android.app.Activity;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.CountDownTimer;
 import android.support.design.widget.Snackbar;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.widget.TextView;
 
@@ -11,9 +17,8 @@ import com.drl.brandis.geschichtswerkstatt.R;
 import java.io.File;
 import java.io.IOException;
 
-import database.Story;
-import recorder.SoundRecorder;
-import recorder.SoundRecorderWav;
+import com.drl.brandis.geschichtswerkstatt.recorder.SoundRecorder;
+import com.drl.brandis.geschichtswerkstatt.recorder.SoundRecorderWav;
 
 public class RecorderActivity extends BaseActivity {
 
@@ -36,6 +41,8 @@ public class RecorderActivity extends BaseActivity {
 
         // init soundrecorder
         recorder = new SoundRecorderWav(getApplicationContext());
+
+        updateUi();
     }
 
     @Override
@@ -51,6 +58,12 @@ public class RecorderActivity extends BaseActivity {
     }
 
     public void startRecording() {
+
+        // request permissions
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, PERMISSIONS_STORAGE, REQUEST_EXTERNAL_STORAGE);
+        }
 
         //start Counting Time, set maximum time
         timer = new CountDownTimer(RECORDING_MAX_TIME, 25) {
@@ -119,19 +132,28 @@ public class RecorderActivity extends BaseActivity {
             showAlert("Error",e.getMessage());
         }
 
-        updateUi();
-
         return file;
     }
 
     private void updateUi() {
 
         TextView textView = (TextView) findViewById(R.id.text_view);
+        View saveButton = findViewById(R.id.save_button);
+        View cancelButton = findViewById(R.id.cancel_button);
 
-        if (state == RecorderState.RECORDING)
+        if (state == RecorderState.RECORDING) {
             textView.setText("Recording");
-        else
+            saveButton.setVisibility(View.INVISIBLE);
+            cancelButton.setVisibility(View.INVISIBLE);
+        } else if (state == RecorderState.STOPPED) {
             textView.setText("Stopped");
+            saveButton.setVisibility(View.VISIBLE);
+            cancelButton.setVisibility(View.VISIBLE);
+        } else {
+            textView.setText("Ready");
+            saveButton.setVisibility(View.INVISIBLE);
+            cancelButton.setVisibility(View.VISIBLE);
+        }
     }
 
     public void onRecordButtonClicked(View view) {
@@ -144,11 +166,17 @@ public class RecorderActivity extends BaseActivity {
     public void onSaveButtonClicked(View view) {
         if (state == RecorderState.STOPPED) {
             File file = saveRecording();
-            if (file != null)
-                Snackbar.make(view, "Recording saved to "+file.getAbsolutePath().toString(), Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show();
+            if (file != null) {
+                Intent intent = new Intent();
+                intent.putExtra("recording",file);
+                setResult(Activity.RESULT_OK,intent);
+                finish();
+            } else
+                finish();
         }
+    }
 
-
+    public void onCancelButtonClicked(View view) {
+        finish();
     }
 }

@@ -10,7 +10,7 @@
     tools:context="com.drl.brandis.geschichtswerkstatt.activities.RecorderActivity">
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_centerInParent="true">
@@ -21,19 +21,39 @@
             android:textOn="Stop"
             android:textOff="Start"
             android:id="@+id/record_button"
-            android:onClick="onRecordButtonClicked"/>
+            android:onClick="onRecordButtonClicked"
+            android:layout_gravity="center"/>
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Stopped"
-            android:id="@+id/text_view"/>
+            android:id="@+id/text_view"
+            android:textAlignment="center"/>
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true">
+
+        <Button
+            android:id="@+id/cancel_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Cancel"
+            android:onClick="onCancelButtonClicked"/>
+
 
         <Button
             android:id="@+id/save_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Save"
+            android:layout_weight="1"
+            android:text="Ok"
             android:onClick="onSaveButtonClicked"/>
 
     </LinearLayout>

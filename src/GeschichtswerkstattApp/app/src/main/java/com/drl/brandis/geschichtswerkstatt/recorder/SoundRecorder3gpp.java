@@ -1,7 +1,7 @@
 /**
  * Created by lutz on 10/04/15.
  */
-package recorder;
+package com.drl.brandis.geschichtswerkstatt.recorder;
 
 import java.io.File;
 import java.io.IOException;

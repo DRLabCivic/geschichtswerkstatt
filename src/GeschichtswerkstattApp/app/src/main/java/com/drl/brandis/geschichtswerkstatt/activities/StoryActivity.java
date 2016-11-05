@@ -15,15 +15,18 @@ import android.support.v4.app.NavUtils;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.drl.brandis.geschichtswerkstatt.R;
+import com.drl.brandis.geschichtswerkstatt.utils.StoryUploader;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.location.places.Place;
@@ -35,20 +38,18 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import database.Story;
-import database.StoryDatabase;
-import utils.Utils;
+import com.drl.brandis.geschichtswerkstatt.database.Story;
+import com.drl.brandis.geschichtswerkstatt.database.StoryDatabase;
+import com.drl.brandis.geschichtswerkstatt.utils.Utils;
+
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class StoryActivity extends BaseActivity {
 
     public static final String PICTURE_FILES_DIRECTORY = "Stories";
-
-    // Storage Permissions
-    private static final int REQUEST_EXTERNAL_STORAGE = 1;
-    private static String[] PERMISSIONS_STORAGE = {
-            Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
-    };
 
     private static final int RECORD_REQUEST_CODE = 1;
     private static final int PLACE_PICKER_REQUEST_CODE = 2;
@@ -59,7 +60,12 @@ public class StoryActivity extends BaseActivity {
     TextView titleEdit;
     TextView textEdit;
     TextView locationText;
+    TextView recordingText;
     ImageView pictureView;
+
+    ViewGroup mainLayout;
+
+    private Call<ResponseBody> httpRequest = null;
 
     public File imageFile;
 
@@ -88,10 +94,13 @@ public class StoryActivity extends BaseActivity {
         else
             getSupportActionBar().setTitle("Neue Geschichte");
 
+        mainLayout = (ViewGroup) findViewById(R.id.main_layout);
+
         titleEdit = (TextView) findViewById(R.id.edit_text_title);
         textEdit = (TextView) findViewById(R.id.edit_text_text);
         locationText = (TextView) findViewById(R.id.location_text);
         pictureView = (ImageView) findViewById(R.id.picture_view);
+        recordingText = (TextView) findViewById(R.id.recording_text);
 
         database = new StoryDatabase(getApplicationContext());
 
@@ -121,6 +130,11 @@ public class StoryActivity extends BaseActivity {
         textEdit.setText(story.text);
         if (story.loc_name != null)
             locationText.setText(story.loc_name);
+
+        if (story.audioFile != null) {
+            File file = new File(story.audioFile);
+            recordingText.setText(file.getName());
+        }
 
         //update image in background task
         AsyncTask task = new AsyncTask<Object, Void, Bitmap>() {
@@ -168,7 +182,7 @@ public class StoryActivity extends BaseActivity {
     public void onImageButtonClicked(View view) {
 
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
-            showAlert("Error", "Cant access the device's camera.");
+            showAlert("Warning", "Cant access the device's camera.");
             return;
         }
 
@@ -189,6 +203,7 @@ public class StoryActivity extends BaseActivity {
 
     public void onLocationButtonClicked(View view) {
 
+        showOverlay("Loading Map", mainLayout);
 
         PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
         try {
@@ -198,25 +213,57 @@ public class StoryActivity extends BaseActivity {
             findViewById(R.id.spinner_overlay).setVisibility(View.VISIBLE);
         } catch (GooglePlayServicesRepairableException e) {
             showAlert("Error",e.getMessage());
+            hideOverlay();
         } catch (GooglePlayServicesNotAvailableException e) {
             showAlert("Error", e.getMessage());
+            hideOverlay();
         }
 
     }
 
     public void onDeleteButtonClicked(View view) {
 
-        database.deleteStory(database.getWritableDatabase(), story._id);
+        database.deleteStory(database.getWritableDatabase(), story);
+        deletedStory = true;
 
         Toast.makeText(getApplicationContext(), "Story " + story.title + " deleted.", Toast.LENGTH_LONG).show();
-
-        deletedStory = true;
 
         finish();
     }
 
     public void onUploadButtonClicked(View view) {
 
+        saveStory();
+
+        showOverlay("Uploading Story...", mainLayout);
+        httpRequest = StoryUploader.upload(story, new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call,
+                                   Response<ResponseBody> response) {
+                hideOverlay();
+
+                //delete story
+                database.deleteStory(database.getWritableDatabase(), story);
+                deletedStory = true;
+
+                try {
+                    Log.e("UPLOAD",response.body().string());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                showAlert("Upload", "Geschichte " + story.title + " wurde erfolgreich hochgeladen.");
+
+                //end activity
+                finish();
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                hideOverlay();
+                showAlert("Upload",t.getMessage());
+            }
+        });
     }
 
     @Override
@@ -240,11 +287,10 @@ public class StoryActivity extends BaseActivity {
     }
 
     @Override
-    protected void onActivityResult(int requestCode,
-                                    int resultCode, Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         //hide Spinner
-        findViewById(R.id.spinner_overlay).setVisibility(View.GONE);
+        hideOverlay();
 
         if (requestCode == PLACE_PICKER_REQUEST_CODE
                 && resultCode == Activity.RESULT_OK) {
@@ -257,17 +303,26 @@ public class StoryActivity extends BaseActivity {
             story.loc_longitude = location.longitude;
             story.loc_name = address.toString();
 
+            saveStory();
             updateUi();
 
         } else if (requestCode == REQUEST_IMAGE_CAPTURE_CODE && resultCode == RESULT_OK) {
-            //Bundle extras = data.getExtras();
-            //Bitmap imageBitmap = (Bitmap) extras.get("data");
-            //pictureView.setImageBitmap(imageBitmap);
 
             if (imageFile.exists()) {
                 story.imageFile = imageFile.getAbsolutePath();
             }
 
+            saveStory();
+            updateUi();
+
+        } else if (requestCode == RECORD_REQUEST_CODE && resultCode == RESULT_OK) {
+
+            if (data.hasExtra("recording")) {
+                File file = (File) data.getSerializableExtra("recording");
+                story.audioFile = file.getAbsolutePath();
+            }
+
+            saveStory();
             updateUi();
 
         } else {
@@ -290,22 +345,5 @@ public class StoryActivity extends BaseActivity {
         mediaFile = new File(mediaStorageDir.getPath() + File.separator + "IMG_" + timeStamp + ".jpg");
 
         return mediaFile;
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case REQUEST_EXTERNAL_STORAGE: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                } else {
-                    showAlert("Error","This app requires to write audio and image file to external storage.");
-                    finish();
-                }
-                return;
-            }
-
-        }
     }
 }

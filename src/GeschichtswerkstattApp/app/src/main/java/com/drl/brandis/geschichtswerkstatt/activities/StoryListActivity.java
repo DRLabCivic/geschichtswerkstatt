@@ -13,9 +13,9 @@ import android.widget.ListView;
 
 import com.drl.brandis.geschichtswerkstatt.R;
 
-import adapters.StoryAdapter;
-import database.Story;
-import database.StoryDatabase;
+import com.drl.brandis.geschichtswerkstatt.adapters.StoryAdapter;
+import com.drl.brandis.geschichtswerkstatt.database.Story;
+import com.drl.brandis.geschichtswerkstatt.database.StoryDatabase;
 
 public class StoryListActivity extends BaseActivity {
 

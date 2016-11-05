@@ -1,4 +1,4 @@
-package database;
+package com.drl.brandis.geschichtswerkstatt.database;
 
 import android.database.Cursor;
 
@@ -20,7 +20,7 @@ public class Story implements Serializable {
     public Double loc_longitude;
     public String loc_name;
 
-    public File audioFile;
+    public String audioFile;
     public String imageFile;
 
     public Story() {
@@ -32,8 +32,10 @@ public class Story implements Serializable {
         title = cursor.getString(cursor.getColumnIndex(StoryContract.StoryEntry.COL_TITLE));
         text = cursor.getString(cursor.getColumnIndex(StoryContract.StoryEntry.COL_TEXT));
         imageFile = cursor.getString(cursor.getColumnIndex(StoryContract.StoryEntry.COL_IMAGE));
+        audioFile = cursor.getString(cursor.getColumnIndex(StoryContract.StoryEntry.COL_AUDIOFILE));
         loc_longitude = cursor.getDouble(cursor.getColumnIndex(StoryContract.StoryEntry.COL_LOCATION_LONG));
         loc_latitude = cursor.getDouble(cursor.getColumnIndex(StoryContract.StoryEntry.COL_LOCATION_LAT));
         loc_name = cursor.getString(cursor.getColumnIndex(StoryContract.StoryEntry.COL_LOCATION_NAME));
+        date = cursor.getString(cursor.getColumnIndex(StoryContract.StoryEntry.COL_DATE));
     }
 }
