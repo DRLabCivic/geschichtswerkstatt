@@ -49,6 +49,8 @@ import retrofit2.Response;
 
 public class StoryActivity extends BaseActivity {
 
+    private static final String LOG_TAG = "StoryActivity";
+
     public static final String PICTURE_FILES_DIRECTORY = "Stories";
 
     private static final int RECORD_REQUEST_CODE = 1;
@@ -164,8 +166,13 @@ public class StoryActivity extends BaseActivity {
         // get values
         if (titleEdit.getText().length() > 0)
             story.title = titleEdit.getText().toString();
+        else
+            story.title = null;
+
         if (textEdit.getText().length() > 0)
             story.text = textEdit.getText().toString();
+        else
+            story.text = null;
 
         // add to database
         Long id = database.upsertStory(database.getWritableDatabase(), story);
@@ -235,6 +242,12 @@ public class StoryActivity extends BaseActivity {
 
         saveStory();
 
+        String validate = story.validate();
+        if (validate != null) {
+            showAlert("Geschichte",validate);
+            return;
+        }
+
         showOverlay("Uploading Story...", mainLayout);
         httpRequest = StoryUploader.upload(story, new Callback<ResponseBody>() {
             @Override
@@ -247,12 +260,12 @@ public class StoryActivity extends BaseActivity {
                 deletedStory = true;
 
                 try {
-                    Log.e("UPLOAD",response.body().string());
+                    Log.e(LOG_TAG,"Upload response: " + response.body().string());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
 
-                showAlert("Upload", "Geschichte " + story.title + " wurde erfolgreich hochgeladen.");
+                Toast.makeText(getApplicationContext(), "Geschichte " + story.title + " wurde erfolgreich hochgeladen.", Toast.LENGTH_LONG).show();
 
                 //end activity
                 finish();

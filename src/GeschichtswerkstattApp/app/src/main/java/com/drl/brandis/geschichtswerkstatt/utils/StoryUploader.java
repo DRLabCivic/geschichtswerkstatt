@@ -15,14 +15,11 @@ import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
-import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
-import retrofit2.http.GET;
 import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.Part;
-import retrofit2.http.Query;
 
 /**
  * Created by lutz on 04/11/16.
@@ -69,14 +66,16 @@ public class StoryUploader {
         MultipartBody.Part audioFile = MultipartBody.Part.createFormData("_","_");
         if (story.audioFile != null) {
             File file = new File(story.audioFile);
-            audioFile = prepareFilePart("audio_file", file);
+            if (file.exists())
+                audioFile = prepareFilePart("audio_file", file);
         }
 
         // picture
         MultipartBody.Part imageFile = MultipartBody.Part.createFormData("_","_");
         if (story.imageFile != null) {
             File file = new File(story.imageFile);
-            imageFile = prepareFilePart("audio_bild", file);
+            if (file.exists())
+                imageFile = prepareFilePart("audio_bild", file);
         }
 
         // add other data
@@ -104,8 +103,6 @@ public class StoryUploader {
         } catch (ParseException e) {
             return "";
         }
-
-
     }
 
     public static final String MULTIPART_FORM_DATA = "multipart/form-data";

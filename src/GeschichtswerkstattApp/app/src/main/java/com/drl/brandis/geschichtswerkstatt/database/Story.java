@@ -39,4 +39,11 @@ public class Story implements Serializable {
         loc_name = cursor.getString(cursor.getColumnIndex(StoryContract.StoryEntry.COL_LOCATION_NAME));
         date = cursor.getString(cursor.getColumnIndex(StoryContract.StoryEntry.COL_DATE));
     }
+
+    public String validate() {
+        if (title == null || title.length() < 1) {
+            return "Titel der Geschichte fehlt.";
+        }
+        return null;
+    }
 }

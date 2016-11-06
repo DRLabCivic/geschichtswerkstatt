@@ -175,8 +175,6 @@ public class SoundRecorderWav extends SoundRecorder {
 
     private void writeAudioDataToFile(RandomAccessFile fileWriter){
 
-        long i = 0;
-
         while (isRecording) {
 
             // fill buffer
@@ -190,13 +188,9 @@ public class SoundRecorderWav extends SoundRecorder {
             }
 
             bytesRecorded += buffer.length;
-
-            i++;
         }
 
         Log.e(LOG_TAG, "Recorded " + bytesRecorded + " bytes");
-
-
     }
 
     private void deleteTempFile() {
