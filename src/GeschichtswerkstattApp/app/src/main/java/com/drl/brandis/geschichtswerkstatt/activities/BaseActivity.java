@@ -32,6 +32,11 @@ public class BaseActivity extends AppCompatActivity {
     protected static String[] PERMISSIONS_AUDIO_RECORD = {
             Manifest.permission.RECORD_AUDIO
     };
+    // Camera Permissions
+    protected static final int REQUEST_CAMERA = 3;
+    protected static String[] PERMISSIONS_CAMERA = {
+            Manifest.permission.CAMERA
+    };
 
     public void showOverlay(String text, ViewGroup parent) {
         LayoutInflater inflater = this.getLayoutInflater();
@@ -47,7 +52,7 @@ public class BaseActivity extends AppCompatActivity {
     }
 
 
-    public void showAlert(final String title,final String message) {
+    public void showAlert(final String title,final String message,  final boolean finishAfter) {
 
         AlertDialog alertDialog = new AlertDialog.Builder(this).create();
         alertDialog.setTitle(title);
@@ -56,9 +61,15 @@ public class BaseActivity extends AppCompatActivity {
             new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int which) {
                     dialog.dismiss();
+                    if (finishAfter)
+                        finish();
                 }
             });
         alertDialog.show();
+    }
+
+    public void showAlert(final String title,final String message) {
+        showAlert(title, message, false);
     }
 
     @Override
@@ -69,8 +80,7 @@ public class BaseActivity extends AppCompatActivity {
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 } else {
-                    showAlert("Error","This app requires to write audio and image file to external storage.");
-                    finish();
+                    showAlert("Error","This app requires to write audio and image file to external storage.", true);
                 }
                 return;
             }
@@ -78,8 +88,15 @@ public class BaseActivity extends AppCompatActivity {
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 } else {
-                    showAlert("Error","This app requires to record audio files.");
-                    finish();
+                    showAlert("Error","This app requires to record audio files.", true);
+                }
+                return;
+            }
+            case REQUEST_CAMERA: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                } else {
+                    showAlert("Error","This app requires to take camera pictures", true);
                 }
                 return;
             }

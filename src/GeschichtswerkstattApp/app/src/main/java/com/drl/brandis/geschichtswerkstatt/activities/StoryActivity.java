@@ -80,6 +80,11 @@ public class StoryActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_story);
 
+        // request permissions
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, PERMISSIONS_STORAGE, REQUEST_EXTERNAL_STORAGE);
+        }
 
         // setup action bar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -113,11 +118,6 @@ public class StoryActivity extends BaseActivity {
     protected void onResume() {
         super.onResume();
 
-        // request permissions
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, PERMISSIONS_STORAGE, REQUEST_EXTERNAL_STORAGE);
-        }
     }
 
     @Override

@@ -23,19 +23,8 @@ public class StoryDatabase extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        String createTable = "CREATE TABLE " + StoryContract.StoryEntry.TABLE + " ( " +
-                StoryContract.StoryEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                StoryContract.StoryEntry.COL_TITLE + " TEXT," +
-                StoryContract.StoryEntry.COL_TEXT + " TEXT," +
-                StoryContract.StoryEntry.COL_LOCATION_LAT + " REAL, " +
-                StoryContract.StoryEntry.COL_LOCATION_LONG + " REAL, " +
-                StoryContract.StoryEntry.COL_LOCATION_NAME + " TEXT, " +
-                StoryContract.StoryEntry.COL_IMAGE + " TEXT ," +
-                StoryContract.StoryEntry.COL_AUDIOFILE + " TEXT ," +
-                StoryContract.StoryEntry.COL_DATE + " DEFAULT CURRENT_TIMESTAMP NOT NULL" +
-                ");";
-
-        db.execSQL(createTable);
+        String query = StoryContract.createTableString();
+        db.execSQL(query);
     }
 
     @Override

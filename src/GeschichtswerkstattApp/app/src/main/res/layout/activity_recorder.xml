@@ -15,6 +15,11 @@
         android:orientation="vertical"
         android:layout_centerInParent="true">
 
+        <FrameLayout
+            android:id="@+id/waveform_layout"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"></FrameLayout>
+
         <ToggleButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

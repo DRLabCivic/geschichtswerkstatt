@@ -7,6 +7,8 @@ import android.media.MediaRecorder;
 import android.os.Environment;
 import android.util.Log;
 
+import com.drl.brandis.geschichtswerkstatt.utils.Utils;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -34,7 +36,6 @@ public class SoundRecorderWav extends SoundRecorder {
     private static final int RECORDER_CHANNELS = AudioFormat.CHANNEL_IN_MONO;
     private static final int RECORDER_AUDIO_ENCODING = AudioFormat.ENCODING_PCM_16BIT;
 
-    short[] audioData;
 
     private AudioRecord recorder = null;
     private int bufferSize = 0;
@@ -61,7 +62,6 @@ public class SoundRecorderWav extends SoundRecorder {
             sampleRate = validRates.get(validRates.size() -1);
 
         bufferSize = AudioRecord.getMinBufferSize(sampleRate,RECORDER_CHANNELS,RECORDER_AUDIO_ENCODING);
-        audioData = new short[bufferSize];
 
         Log.e(LOG_TAG,"Recorder initialized with sample rate:"+ sampleRate + ", buffer size:"+ bufferSize);
     }
@@ -180,6 +180,9 @@ public class SoundRecorderWav extends SoundRecorder {
             // fill buffer
             recorder.read(buffer, 0, buffer.length);
 
+            if (callback != null)
+                callback.onNewData(buffer);
+
             // write buffer to file
             try {
                 fileWriter.write(buffer);
@@ -248,7 +251,8 @@ public class SoundRecorderWav extends SoundRecorder {
     public ArrayList<Integer> getValidSampleRates() {
 
         int sampleRates[] = {8000, 11025, 16000, 22050, 44100};
-        //int sampleRates[] = {8000, 11025, 16000};
+        if (Utils.isEmulator())
+            sampleRates = new int[] { 8000 };
 
         ArrayList<Integer> passedRates =new ArrayList<Integer>();
 

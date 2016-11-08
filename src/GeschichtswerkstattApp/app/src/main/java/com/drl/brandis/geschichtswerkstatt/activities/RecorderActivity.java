@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.drl.brandis.geschichtswerkstatt.R;
@@ -18,6 +19,7 @@ import java.io.IOException;
 
 import com.drl.brandis.geschichtswerkstatt.recorder.SoundRecorder;
 import com.drl.brandis.geschichtswerkstatt.recorder.SoundRecorderWav;
+import com.drl.brandis.geschichtswerkstatt.views.WaveformView;
 
 public class RecorderActivity extends BaseActivity {
 
@@ -28,6 +30,7 @@ public class RecorderActivity extends BaseActivity {
     CountDownTimer timer = null;
 
     SoundRecorder recorder;
+    WaveformView waveformView;
 
     public enum RecorderState {
         INIT, RECORDING, STOPPED
@@ -50,6 +53,15 @@ public class RecorderActivity extends BaseActivity {
 
         // init soundrecorder
         recorder = new SoundRecorderWav(getApplicationContext());
+        waveformView = new WaveformView(this);
+        recorder.setAudioBufferCallback(new SoundRecorder.AudioBufferCallback() {
+            @Override
+            public void onNewData(byte[] buffer) {
+                waveformView.updateAudioData(buffer);
+            }
+        });
+
+        ((FrameLayout)findViewById(R.id.waveform_layout)).addView(waveformView);
 
         updateUi();
     }
