@@ -5,10 +5,12 @@ import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.Environment;
+import android.provider.ContactsContract;
 import android.util.Log;
 
 import com.drl.brandis.geschichtswerkstatt.utils.Utils;
 
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -31,7 +33,7 @@ public class SoundRecorderWav extends SoundRecorder {
 
     private static final String AUDIO_RECORDER_FILE_EXT_WAV = ".wav";
     private static final String AUDIO_RECORDER_FOLDER = "AudioRecorder";
-    private static final String AUDIO_RECORDER_TEMP_FILE = "record_temp.wav";
+    private static final String AUDIO_RECORDER_TEMP_FILE = "record_temp.raw";
 
     private static final int RECORDER_CHANNELS = AudioFormat.CHANNEL_IN_MONO;
     private static final int RECORDER_AUDIO_ENCODING = AudioFormat.ENCODING_PCM_16BIT;
@@ -40,17 +42,13 @@ public class SoundRecorderWav extends SoundRecorder {
     private AudioRecord recorder = null;
     private int bufferSize = 0;
     private Thread recordingThread = null;
-    private boolean isRecording = false;
 
     // Buffer for output
-    private byte[] buffer;
+    private short[] buffer;
     private int sampleRate;
 
-    // File writer
-    private RandomAccessFile randomAccessWriter;
-
     //size of the record
-    int bytesRecorded;
+    int bytesRecorded = 0;
 
     public SoundRecorderWav(Context context) {
         super(context);
@@ -69,23 +67,23 @@ public class SoundRecorderWav extends SoundRecorder {
     @Override
     public void prepare() throws Exception {
 
-        //open temp file for writing
-        randomAccessWriter = new RandomAccessFile(getTempFile(), "rw");
-
-        writeWaveFileHeader(randomAccessWriter);
-        buffer = new byte[bufferSize];
-    }
-
-    @Override
-    public void startRecording() throws IOException {
+        // init recorder
         recorder = new AudioRecord(MediaRecorder.AudioSource.MIC,sampleRate,
                 RECORDER_CHANNELS,RECORDER_AUDIO_ENCODING, bufferSize);
 
-        int state = recorder.getState();
-        if(state == AudioRecord.STATE_INITIALIZED)
-            recorder.startRecording();
+        //init buffer
+        buffer = new short[bufferSize];
+    }
 
-        isRecording = true;
+    @Override
+    public void startRecording() throws Exception {
+        if (recorder == null)
+            throw new Exception("Recorder not prepared.");
+
+        //open temp file for writing
+        final RandomAccessFile randomAccessWriter = new RandomAccessFile(getTempFile(), "rw");
+
+        recorder.startRecording();
 
         recordingThread = new Thread(new Runnable() {
             @Override
@@ -98,22 +96,15 @@ public class SoundRecorderWav extends SoundRecorder {
 
     @Override
     public void stopRecording() {
-        if (recorder != null) {
-            isRecording = false;
-
-            int state = recorder.getState();
-            if( state == AudioRecord.STATE_INITIALIZED)
-                recorder.stop();
-
-            recorder.release();
-
-            recorder = null;
-            recordingThread = null;
-
-            try {
-                writeWavSizeToHeader(randomAccessWriter);
-            } catch (Exception e) {
-                e.printStackTrace();
+        if (recorder != null && recorder.getState() == AudioRecord.STATE_INITIALIZED) {
+            recorder.stop();
+            // wait for recording thread to end
+            while (recordingThread != null) {
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -122,18 +113,18 @@ public class SoundRecorderWav extends SoundRecorder {
     public void reset() {
         stopRecording();
         deleteTempFile();
+        bytesRecorded = 0;
     }
 
     @Override
     public File save() throws IOException {
 
         String filename = System.currentTimeMillis() + AUDIO_RECORDER_FILE_EXT_WAV;
-
         File output = new File(getPath(),filename);
 
         Log.e("RECORDER","Recording saved to "+output.getAbsolutePath().toString());
 
-        copyFile(getTempFile(), output);
+        saveRawFileToWav(getTempFile(), output);
         deleteTempFile();
         return output;
     }
@@ -148,10 +139,13 @@ public class SoundRecorderWav extends SoundRecorder {
         return file;
     }
 
-    public File copyFile(File src, File dst) throws IOException {
+    public File saveRawFileToWav(File srcRaw, File dst) throws IOException {
 
-        InputStream in = new FileInputStream(src);
+        InputStream in = new FileInputStream(srcRaw);
         OutputStream out = new FileOutputStream(dst);
+
+        //first write header
+        writeWaveFileHeader(new DataOutputStream(out));
 
         // Transfer bytes from in to out
         byte[] buf = new byte[1024];
@@ -175,17 +169,15 @@ public class SoundRecorderWav extends SoundRecorder {
 
     private void writeAudioDataToFile(RandomAccessFile fileWriter){
 
-        while (isRecording) {
+        while (recorder.read(buffer, 0, buffer.length) > 0) {
 
-            // fill buffer
-            recorder.read(buffer, 0, buffer.length);
 
-            if (callback != null)
-                callback.onNewData(buffer);
+            callback.onNewData(Utils.getMaxAbs(buffer));
 
             // write buffer to file
             try {
-                fileWriter.write(buffer);
+                byte[] byteBuffer = short2byte(buffer);
+                fileWriter.write(byteBuffer);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -193,7 +185,24 @@ public class SoundRecorderWav extends SoundRecorder {
             bytesRecorded += buffer.length;
         }
 
+        // release hardware
+        recorder.release();
+
+        recordingThread = null;
+
         Log.e(LOG_TAG, "Recorded " + bytesRecorded + " bytes");
+    }
+
+    private byte[] short2byte(short[] sData) {
+        int shortArrsize = sData.length;
+        byte[] bytes = new byte[shortArrsize * 2];
+        for (int i = 0; i < shortArrsize; i++) {
+            bytes[i * 2] = (byte) (sData[i] & 0x00FF);
+            bytes[(i * 2) + 1] = (byte) (sData[i] >> 8);
+            sData[i] = 0;
+        }
+        return bytes;
+
     }
 
     private void deleteTempFile() {
@@ -202,7 +211,7 @@ public class SoundRecorderWav extends SoundRecorder {
             file.delete();
     }
 
-    private void writeWaveFileHeader(RandomAccessFile fileWriter) throws IOException {
+    private void writeWaveFileHeader(DataOutputStream fileWriter) throws IOException {
 
         short bSamples;
         if (RECORDER_AUDIO_ENCODING == AudioFormat.ENCODING_PCM_16BIT) {
@@ -220,9 +229,8 @@ public class SoundRecorderWav extends SoundRecorder {
 
         int sRate = sampleRate;
 
-        fileWriter.setLength(0); // Set file length to 0, to prevent unexpected behavior in case the file already existed
         fileWriter.writeBytes("RIFF");
-        fileWriter.writeInt(0); // Final file size not known yet, write 0
+        fileWriter.writeInt(Integer.reverseBytes(36 + bytesRecorded)); // Final file size not known yet, write 0
         fileWriter.writeBytes("WAVE");
         fileWriter.writeBytes("fmt ");
         fileWriter.writeInt(Integer.reverseBytes(16)); // Sub-chunk size, 16 for PCM
@@ -233,26 +241,14 @@ public class SoundRecorderWav extends SoundRecorder {
         fileWriter.writeShort(Short.reverseBytes((short) (nChannels * bSamples / 8))); // Block align, NumberOfChannels*BitsPerSample/8
         fileWriter.writeShort(Short.reverseBytes(bSamples)); // Bits per sample
         fileWriter.writeBytes("data");
-        fileWriter.writeInt(0); // Data chunk size not known yet, write 0
-    }
-
-
-    private void writeWavSizeToHeader(RandomAccessFile fileWriter) throws Exception {
-
-        fileWriter.seek(4); // Write size to RIFF header
-        fileWriter.writeInt(Integer.reverseBytes(36 + bytesRecorded));
-
-        fileWriter.seek(40); // Write size to Subchunk2Size field
-        fileWriter.writeInt(Integer.reverseBytes(bytesRecorded));
-
-        fileWriter.close();
+        fileWriter.writeInt(Integer.reverseBytes(bytesRecorded)); // Data chunk size not known yet, write 0
     }
 
     public ArrayList<Integer> getValidSampleRates() {
 
         int sampleRates[] = {8000, 11025, 16000, 22050, 44100};
         if (Utils.isEmulator())
-            sampleRates = new int[] { 8000 };
+            sampleRates = new int[] { 16000 };
 
         ArrayList<Integer> passedRates =new ArrayList<Integer>();
 

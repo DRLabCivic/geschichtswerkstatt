@@ -14,7 +14,7 @@ abstract public class SoundRecorder {
     protected Context context;
 
     public interface AudioBufferCallback {
-        void onNewData(byte[] buffer);
+        void onNewData(int max);
     }
 
     AudioBufferCallback callback = null;
@@ -26,7 +26,7 @@ abstract public class SoundRecorder {
     public void setAudioBufferCallback(AudioBufferCallback callback) {
         this.callback = callback;
     }
-    abstract public void startRecording() throws IOException;
+    abstract public void startRecording() throws Exception;
     abstract public void stopRecording() throws IOException;
     abstract public void reset() throws IOException;
     abstract public File save() throws IOException;

@@ -2,13 +2,16 @@ package com.drl.brandis.geschichtswerkstatt.activities;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.CountDownTimer;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
@@ -23,7 +26,7 @@ import com.drl.brandis.geschichtswerkstatt.views.WaveformView;
 
 public class RecorderActivity extends BaseActivity {
 
-    public static final int RECORDING_MAX_TIME = 1000 * 60 * 10;
+    public static final int RECORDING_MAX_TIME = 1000 * 60 * 5;
 
     RecorderState state = RecorderState.INIT;
 
@@ -31,6 +34,9 @@ public class RecorderActivity extends BaseActivity {
 
     SoundRecorder recorder;
     WaveformView waveformView;
+    TextView timerView;
+
+    PowerManager.WakeLock wakeLock;
 
     public enum RecorderState {
         INIT, RECORDING, STOPPED
@@ -51,17 +57,24 @@ public class RecorderActivity extends BaseActivity {
             ActivityCompat.requestPermissions(this, PERMISSIONS_AUDIO_RECORD, REQUEST_AUDIO_RECORD);
         }
 
+        timerView = (TextView) findViewById(R.id.elapsed_time);
+        waveformView = (WaveformView) findViewById(R.id.waveform_view);
+
         // init soundrecorder
         recorder = new SoundRecorderWav(getApplicationContext());
-        waveformView = new WaveformView(this);
         recorder.setAudioBufferCallback(new SoundRecorder.AudioBufferCallback() {
             @Override
-            public void onNewData(byte[] buffer) {
-                waveformView.updateAudioData(buffer);
+            public void onNewData(int max) {
+                waveformView.updateAudioData(max);
             }
         });
 
-        ((FrameLayout)findViewById(R.id.waveform_layout)).addView(waveformView);
+        // init wakelock
+        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Recorder Wake Lock");
+
+        // keep screen always on
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         updateUi();
     }
@@ -69,22 +82,17 @@ public class RecorderActivity extends BaseActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        resetRecording();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (wakeLock.isHeld())
+            wakeLock.release();
         recorder.release();
     }
 
     public void startRecording() {
-
-        // request permissions
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, PERMISSIONS_STORAGE, REQUEST_EXTERNAL_STORAGE);
-        }
 
         //start Counting Time, set maximum time
         timer = new CountDownTimer(RECORDING_MAX_TIME, 25) {
@@ -93,6 +101,7 @@ public class RecorderActivity extends BaseActivity {
 
             public void onTick(long millisUntilFinished) {
                 long elapsedTime = System.currentTimeMillis() - startTime;
+                timerView.setText(convertTimeString(elapsedTime));
             }
 
             public void onFinish() {
@@ -104,6 +113,7 @@ public class RecorderActivity extends BaseActivity {
             recorder.prepare();
             recorder.startRecording();
             state = RecorderState.RECORDING;
+            wakeLock.acquire();
         } catch (Exception e) {
             showAlert("Error", e.getMessage());
             stopRecording();
@@ -123,6 +133,7 @@ public class RecorderActivity extends BaseActivity {
         try {
             recorder.stopRecording();
             state = RecorderState.STOPPED;
+            wakeLock.release();
         } catch (IOException e) {
             showAlert("Error", e.getMessage());
         }
@@ -131,6 +142,12 @@ public class RecorderActivity extends BaseActivity {
     }
 
     public void resetRecording() {
+
+        //stop timer
+        if (timer != null) {
+            timer.cancel();
+            timer = null;
+        }
 
         try {
             recorder.reset();
@@ -180,7 +197,10 @@ public class RecorderActivity extends BaseActivity {
     public void onRecordButtonClicked(View view) {
         if (state == RecorderState.INIT)
             startRecording();
-        else if (state == RecorderState.RECORDING)
+        else if (state == RecorderState.STOPPED) {
+            resetRecording();
+            startRecording();
+        } else if (state == RecorderState.RECORDING)
             stopRecording();
     }
 
@@ -199,5 +219,14 @@ public class RecorderActivity extends BaseActivity {
 
     public void onCancelButtonClicked(View view) {
         finish();
+    }
+
+    private String convertTimeString(long milliseconds) {
+
+        long hsecs = (milliseconds % 1000 ) / 10;
+        long seconds = (milliseconds / 1000) % 60;
+        long minutes = (milliseconds / 1000) / 60;
+
+        return String.format("%02d:%02d.%02d", minutes, seconds, hsecs);
     }
 }

@@ -67,4 +67,13 @@ public class Utils {
                 || (Build.BRAND.startsWith("generic") && Build.DEVICE.startsWith("generic"))
                 || "google_sdk".equals(Build.PRODUCT);
     }
+
+    public static int getMaxAbs(short[] array) {
+        int max = 0;
+        for (int i=0;i<array.length; i++ ) {
+            if (Math.abs(array[i]) > max)
+                max = Math.abs(array[i]);
+        }
+        return max;
+    }
 }

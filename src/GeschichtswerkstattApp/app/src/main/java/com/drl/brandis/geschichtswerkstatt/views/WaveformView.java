@@ -17,13 +17,21 @@
 package com.drl.brandis.geschichtswerkstatt.views;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.SurfaceView;
 
+import com.drl.brandis.geschichtswerkstatt.R;
+
 import java.util.LinkedList;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+import static java.util.concurrent.locks.ReentrantReadWriteLock.*;
 
 /**
  * A view that displays audio data on the screen as a waveform.
@@ -36,12 +44,17 @@ public class WaveformView extends SurfaceView {
     // To make quieter sounds still show up well on the display, we use +/- 8192 as the amplitude
     // that reaches the top/bottom of the view instead of +/- 32767. Any samples that have
     // magnitude higher than this limit will simply be clipped during drawing.
-    private static final float MAX_AMPLITUDE_TO_DRAW = 128.0f;
+    private static final float MAX_AMPLITUDE_TO_DRAW = 20000.0F;
 
     // The queue that will hold historical audio data.
-    private final LinkedList<byte[]> mAudioData;
+    private final LinkedList<Integer> mAudioData;
 
     private final Paint mPaint;
+
+    private ColorStateList backgroundColor;
+    private ColorStateList strokeColor;
+
+    private ReentrantLock lock;
 
     public WaveformView(Context context) {
         this(context, null, 0);
@@ -54,13 +67,50 @@ public class WaveformView extends SurfaceView {
     public WaveformView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
 
-        mAudioData = new LinkedList<byte[]>();
+        TypedArray attrArray = context.obtainStyledAttributes(attrs, R.styleable.WaveformView, defStyle, 0);
+
+        backgroundColor = attrArray.getColorStateList(R.styleable.WaveformView_canvasBgColor);
+        strokeColor = attrArray.getColorStateList(R.styleable.WaveformView_strokeColor);
+
+        mAudioData = new LinkedList<Integer>();
 
         mPaint = new Paint();
-        mPaint.setStyle(Paint.Style.STROKE);
-        mPaint.setColor(Color.WHITE);
-        mPaint.setStrokeWidth(0);
+        mPaint.setStyle(Paint.Style.FILL);
+        mPaint.setColor(strokeColor.getDefaultColor());
+        mPaint.setStrokeWidth(1);
         mPaint.setAntiAlias(true);
+
+        lock = new ReentrantLock();
+
+        //call onDraw
+        setWillNotDraw(false);
+        this.invalidate();
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        canvas.drawColor(backgroundColor.getDefaultColor());
+
+        float width = getWidth();
+        float height = getHeight();
+        float centerY = height / 2;
+        float centerX = width / 2;
+
+        // We draw the history from oldest to newest so that the older audio data is further back
+        // and darker than the most recent data.
+        int colorDelta = 255 / (HISTORY_SIZE + 1);
+        int brightness = colorDelta;
+
+        for (int max : mAudioData) {
+            mPaint.setColor(strokeColor.getDefaultColor());
+            mPaint.setAlpha(brightness);
+
+            float radius = Math.min(height/2, (max / MAX_AMPLITUDE_TO_DRAW) * height/2);
+
+            canvas.drawCircle(centerX,centerY, radius, mPaint);
+
+            brightness += colorDelta;
+        }
     }
 
     /**
@@ -70,68 +120,13 @@ public class WaveformView extends SurfaceView {
      *
      * @param buffer the most recent buffer of audio samples
      */
-    public synchronized void updateAudioData(byte[] buffer) {
-        byte[] newBuffer;
+    public synchronized void updateAudioData(int max) {
 
-        // We want to keep a small amount of history in the view to provide a nice fading effect.
-        // We use a linked list that we treat as a queue for this.
-        if (mAudioData.size() == HISTORY_SIZE) {
-            newBuffer = mAudioData.removeFirst();
-            System.arraycopy(buffer, 0, newBuffer, 0, buffer.length);
-        } else {
-            newBuffer = buffer.clone();
-        }
+        if (mAudioData.size() >= HISTORY_SIZE)
+            mAudioData.removeFirst();
+        mAudioData.add(max);
 
-        mAudioData.addLast(newBuffer);
-
-        // Update the display.
-        Canvas canvas = getHolder().lockCanvas();
-        if (canvas != null) {
-            drawWaveform(canvas);
-            getHolder().unlockCanvasAndPost(canvas);
-        }
+        postInvalidate();
     }
 
-    /**
-     * Repaints the view's surface.
-     *
-     * @param canvas the {@link Canvas} object on which to draw
-     */
-    private void drawWaveform(Canvas canvas) {
-        // Clear the screen each time because SurfaceView won't do this for us.
-        canvas.drawColor(Color.BLACK);
-
-        float width = getWidth();
-        float height = getHeight();
-        float centerY = height / 2;
-
-        // We draw the history from oldest to newest so that the older audio data is further back
-        // and darker than the most recent data.
-        int colorDelta = 255 / (HISTORY_SIZE + 1);
-        int brightness = colorDelta;
-
-        for (byte[] buffer : mAudioData) {
-            mPaint.setColor(Color.argb(brightness, 255, 255, 255));
-
-            float lastX = -1;
-            float lastY = -1;
-
-            // For efficiency, we don't draw all of the samples in the buffer, but only the ones
-            // that align with pixel boundaries.
-            for (int x = 0; x < width; x++) {
-                int index = (int) ((x / width) * buffer.length);
-                short sample = buffer[index];
-                float y = (sample / MAX_AMPLITUDE_TO_DRAW) * centerY + centerY;
-
-                if (lastX != -1) {
-                    canvas.drawLine(lastX, lastY, x, y, mPaint);
-                }
-
-                lastX = x;
-                lastY = y;
-            }
-
-            brightness += colorDelta;
-        }
-    }
 }

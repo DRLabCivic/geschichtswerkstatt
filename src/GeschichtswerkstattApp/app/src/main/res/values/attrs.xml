@@ -9,4 +9,9 @@
         <attr name="metaButtonBarButtonStyle" format="reference" />
     </declare-styleable>
 
+    <declare-styleable name="WaveformView">
+        <attr name="canvasBgColor" format="color"/>
+        <attr name="strokeColor" format="color"/>
+    </declare-styleable>
+
 </resources>
