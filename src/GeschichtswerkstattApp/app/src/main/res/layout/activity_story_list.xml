@@ -3,29 +3,46 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.drl.brandis.geschichtswerkstatt.activities.StoryListActivity">
+    tools:context="com.drl.brandis.geschichtswerkstatt.activities.StoryListActivity"
+    style="@style/mainLayoutStyle">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
-        android:elevation="4dp"
-        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"/>
+        android:theme="@style/toolbarStyle"/>
+
+    <TextView
+        android:id="@+id/story_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/toolbar"
+        android:text="ENTWÜRFE"
+        style="@style/headerText"/>
 
     <ListView
         android:id="@+id/storyList"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/toolbar"/>
+        android:layout_below="@id/story_title"/>
 
-    <android.support.design.widget.FloatingActionButton
+    <TextView
+        android:id="@+id/empty_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/spacing"
+        android:text="Klicke unten auf den Button um eine Geschichte aufzunehmen."
+        android:layout_below="@id/storyList"
+        style="@style/descriptionText"/>
+
+    <Button
         android:id="@+id/fab"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
         android:layout_margin="@dimen/fab_margin"
-        android:src="@drawable/plus"/>
+        android:text="Neue Geschichte"
+        android:onClick="onFabButtonClicked"
+        style="@style/textButtonStyle"/>
 
 </RelativeLayout>

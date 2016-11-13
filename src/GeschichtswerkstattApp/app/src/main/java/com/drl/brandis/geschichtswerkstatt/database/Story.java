@@ -4,6 +4,11 @@ import android.database.Cursor;
 
 import java.io.File;
 import java.io.Serializable;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Created by lutz on 02/11/16.
@@ -40,10 +45,44 @@ public class Story implements Serializable {
         date = cursor.getString(cursor.getColumnIndex(StoryContract.StoryEntry.COL_DATE));
     }
 
-    public String validate() {
+    public List<String> validate() {
+
+        List<String> errors = new ArrayList<String>();
+
         if (title == null || title.length() < 1) {
-            return "Titel der Geschichte fehlt.";
+            errors.add("Titel der Geschichte fehlt.");
         }
-        return null;
+
+        if (audioFile == null) {
+            errors.add("Aufnahme fehlt.");
+        } else {
+            File file = new File(audioFile);
+            if (!file.exists())
+                errors.add("Aufnahme Datei kann nicht gefunden werden");
+        }
+
+        if (errors.isEmpty())
+            return null;
+        else
+            return errors;
+    }
+
+    public boolean isEmpty() {
+        return (title == null && text == null && imageFile == null && audioFile == null && loc_name == null);
+    }
+
+    public String getDate() {
+        if (date == null)
+            return null;
+
+        SimpleDateFormat iso8601Format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat outputFormat = new SimpleDateFormat("dd.MM.yyyy");
+
+        try {
+            Date date = iso8601Format.parse(this.date);
+            return outputFormat.format(date);
+        } catch (ParseException e) {
+            return null;
+        }
     }
 }

@@ -6,20 +6,21 @@
         android:id="@+id/story_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:padding="@dimen/spacing"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
-        android:text="Kein Titel"
-        android:layout_margin="@dimen/spacing"/>
+        android:text="Kein Titel"/>
+
 
     <!--<Button
-        android:id="@+id/story_delete"
+        android:id="@+id/story_upload"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:text="Delete"
+        android:text="Upload"
         android:onClick="onItemDeleteButtonClicked"
         android:layout_marginRight="@dimen/spacing"/>-->
 

@@ -42,6 +42,7 @@ public class StoryAdapter extends CursorAdapter {
         if (story.title != null)
             titleView.setText(story.title);
 
+
         //set model to view
         view.setTag(story);
     }

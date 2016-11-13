@@ -15,12 +15,17 @@ import android.support.v4.app.NavUtils;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -37,6 +42,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 import com.drl.brandis.geschichtswerkstatt.database.Story;
 import com.drl.brandis.geschichtswerkstatt.database.StoryDatabase;
@@ -128,6 +134,7 @@ public class StoryActivity extends BaseActivity {
     }
 
     protected void updateUi() {
+
         titleEdit.setText(story.title);
         textEdit.setText(story.text);
         if (story.loc_name != null)
@@ -137,6 +144,19 @@ public class StoryActivity extends BaseActivity {
             File file = new File(story.audioFile);
             recordingText.setText(file.getName());
         }
+
+        titleEdit.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                updateCheckmarks();
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
 
         //update image in background task
         AsyncTask task = new AsyncTask<Object, Void, Bitmap>() {
@@ -159,6 +179,23 @@ public class StoryActivity extends BaseActivity {
         };
         task.execute();
 
+        updateCheckmarks();
+
+    }
+
+    protected void updateCheckmarks() {
+
+        boolean isTextSet = titleEdit.getText().length() > 3;
+        ((CheckBox)findViewById(R.id.check_text)).setChecked(isTextSet);
+
+        boolean isRecordSet = story.audioFile != null;
+        ((CheckBox)findViewById(R.id.check_record)).setChecked(isRecordSet);
+
+        boolean isPlaceSet = story.loc_name != null;
+        ((CheckBox)findViewById(R.id.check_place)).setChecked(isPlaceSet);
+
+        boolean isImgSet = story.imageFile != null;
+        ((CheckBox)findViewById(R.id.check_img)).setChecked(isImgSet);
     }
 
     public void saveStory() {
@@ -173,6 +210,9 @@ public class StoryActivity extends BaseActivity {
             story.text = textEdit.getText().toString();
         else
             story.text = null;
+
+        if (story.isEmpty())
+            return;
 
         // add to database
         Long id = database.upsertStory(database.getWritableDatabase(), story);
@@ -242,9 +282,9 @@ public class StoryActivity extends BaseActivity {
 
         saveStory();
 
-        String validate = story.validate();
-        if (validate != null) {
-            showAlert("Geschichte",validate);
+        List<String> errors = story.validate();
+        if (errors != null) {
+            showAlert("Geschichte", TextUtils.join(" ",errors));
             return;
         }
 
@@ -291,6 +331,9 @@ public class StoryActivity extends BaseActivity {
         switch (item.getItemId()) {
             // Respond to the action bar's Up/Home button
             case android.R.id.home:
+                NavUtils.navigateUpFromSameTask(this);
+                return true;
+            case R.id.action_save:
                 NavUtils.navigateUpFromSameTask(this);
                 return true;
             case R.id.action_delete:

@@ -10,6 +10,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.drl.brandis.geschichtswerkstatt.R;
 
@@ -39,6 +40,7 @@ public class StoryListActivity extends BaseActivity {
 
         database = new StoryDatabase(getApplicationContext());
 
+        //setup listview
         storyListView = (ListView) findViewById(R.id.storyList);
         storyListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -46,14 +48,8 @@ public class StoryListActivity extends BaseActivity {
                 onListItemClicked(parent,view,position,id);
             }
         });
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onFabButtonClicked(view);
-            }
-        });
+        TextView emptyText = (TextView)findViewById(R.id.empty_text);
+        storyListView.setEmptyView(emptyText);
 
         updateUi();
     }

@@ -41,7 +41,7 @@
         </activity>
         <activity
             android:name=".activities.StoryListActivity"
-            android:label="Geschichten"
+            android:label="Meine Geschichten"
             android:parentActivityName=".activities.MainActivity" />
         <activity
             android:name=".activities.StoryActivity"
