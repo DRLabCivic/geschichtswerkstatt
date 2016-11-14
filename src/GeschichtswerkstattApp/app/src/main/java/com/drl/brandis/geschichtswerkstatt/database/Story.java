@@ -15,6 +15,8 @@ import java.util.List;
  */
 public class Story implements Serializable {
 
+    public static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
+
     public long _id;
     public String title;
     public String text;
@@ -31,6 +33,10 @@ public class Story implements Serializable {
     public Story() {
 
         _id = -1;
+
+        // get current date
+        SimpleDateFormat iso8601Format = new SimpleDateFormat(DATE_FORMAT);
+        date = iso8601Format.format(new Date());
     }
 
     public Story(Cursor cursor) {
@@ -71,16 +77,14 @@ public class Story implements Serializable {
         return (title == null && text == null && imageFile == null && audioFile == null && loc_name == null);
     }
 
-    public String getDate() {
+    public Date getDate() {
         if (date == null)
             return null;
 
-        SimpleDateFormat iso8601Format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        SimpleDateFormat outputFormat = new SimpleDateFormat("dd.MM.yyyy");
+        SimpleDateFormat iso8601Format = new SimpleDateFormat(DATE_FORMAT);
 
         try {
-            Date date = iso8601Format.parse(this.date);
-            return outputFormat.format(date);
+            return iso8601Format.parse(this.date);
         } catch (ParseException e) {
             return null;
         }

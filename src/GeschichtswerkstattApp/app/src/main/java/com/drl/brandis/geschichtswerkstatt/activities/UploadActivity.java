@@ -32,6 +32,8 @@ public class UploadActivity extends BaseActivity {
 
     private StoryDatabase database;
 
+    private boolean uploading = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,11 +49,13 @@ public class UploadActivity extends BaseActivity {
 
         database = new StoryDatabase(getApplicationContext());
 
-
-        uploadStory();
+        if (!uploading)
+            uploadStory();
     }
 
     public void uploadStory() {
+
+        uploading = true;
 
         httpRequest = StoryUploader.upload(this.story, new Callback<ResponseBody>() {
             @Override
@@ -68,7 +72,7 @@ public class UploadActivity extends BaseActivity {
                     e.printStackTrace();
                 }
 
-                Toast.makeText(getApplicationContext(), "Geschichte " + story.title + " wurde erfolgreich hochgeladen.", Toast.LENGTH_LONG).show();
+                //Toast.makeText(getApplicationContext(), "Geschichte " + story.title + " wurde erfolgreich hochgeladen.", Toast.LENGTH_LONG).show();
 
                 findViewById(R.id.uploading_layout).setVisibility(View.GONE);
                 findViewById(R.id.done_layout).setVisibility(View.VISIBLE);

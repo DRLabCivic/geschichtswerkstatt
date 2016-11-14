@@ -54,8 +54,10 @@
         <activity
             android:name=".activities.ScannerActivity"
             android:label="QR Scanner"
-            android:parentActivityName=".activities.MainActivity"></activity>
-        <activity android:name=".activities.UploadActivity"></activity>
+            android:parentActivityName=".activities.MainActivity"/>
+        <activity
+            android:name=".activities.UploadActivity"
+            android:configChanges="orientation|screenSize"/>
     </application>
 
 </manifest>

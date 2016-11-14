@@ -6,6 +6,7 @@ import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.StringTokenizer;
 
 import com.drl.brandis.geschichtswerkstatt.database.Story;
 import okhttp3.MediaType;
@@ -27,7 +28,9 @@ import retrofit2.http.Part;
 public class StoryUploader {
 
     //public static final String API_BASE_URL = "http://192.168.1.5:8081";
-    public static final String API_BASE_URL = "http://gp.community-infrastructuring.org/wp-admin/";
+    public static final String API_BASE_URL = "http://geschichtswerkstatt.brandis.eu/wp-admin/";
+
+    public static final String API_DATE_FORMAT = "yyyy-MM-dd";
 
     public static class ServiceGenerator {
 
@@ -81,7 +84,7 @@ public class StoryUploader {
         // add other data
         RequestBody title = createPartFromString(story.title == null ? "" : story.title);
         RequestBody text = createPartFromString(story.text == null ? "" : story.text);
-        RequestBody date = createPartFromString(story.date == null ? "" : formatDate(story.date));
+        RequestBody date = createPartFromString(story.date == null ? "" : formatDate(story.getDate()));
         RequestBody latitude = createPartFromString(story.loc_name == null ? "" : Double.toString(story.loc_latitude));
         RequestBody longitude = createPartFromString(story.loc_name == null ? "" : Double.toString(story.loc_longitude));
 
@@ -92,17 +95,13 @@ public class StoryUploader {
         return call;
     }
 
-    public static String formatDate(String dateString) {
+    public static String formatDate(Date date) {
 
-        SimpleDateFormat iso8601Format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd");
-
-        try {
-            Date date = iso8601Format.parse(dateString);
-            return outputFormat.format(date);
-        } catch (ParseException e) {
+        if (date == null)
             return "";
-        }
+
+        SimpleDateFormat outputFormat = new SimpleDateFormat(API_DATE_FORMAT);
+        return outputFormat.format(date);
     }
 
     public static final String MULTIPART_FORM_DATA = "multipart/form-data";
