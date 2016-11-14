@@ -73,8 +73,6 @@ public class StoryActivity extends BaseActivity {
 
     ViewGroup mainLayout;
 
-    private Call<ResponseBody> httpRequest = null;
-
     public File imageFile;
 
     private boolean deletedStory = false;
@@ -284,39 +282,14 @@ public class StoryActivity extends BaseActivity {
 
         List<String> errors = story.validate();
         if (errors != null) {
-            showAlert("Geschichte", TextUtils.join(" ",errors));
+            showAlert("Fehler", TextUtils.join(" ",errors));
             return;
         }
 
-        showOverlay("Uploading Story...", mainLayout);
-        httpRequest = StoryUploader.upload(story, new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call,
-                                   Response<ResponseBody> response) {
-                hideOverlay();
+        Intent intent = new Intent(getApplicationContext(), UploadActivity.class);
+        intent.putExtra("story",this.story);
+        startActivity(intent);
 
-                //delete story
-                database.deleteStory(database.getWritableDatabase(), story);
-                deletedStory = true;
-
-                try {
-                    Log.e(LOG_TAG,"Upload response: " + response.body().string());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                Toast.makeText(getApplicationContext(), "Geschichte " + story.title + " wurde erfolgreich hochgeladen.", Toast.LENGTH_LONG).show();
-
-                //end activity
-                finish();
-            }
-
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                hideOverlay();
-                showAlert("Upload",t.getMessage());
-            }
-        });
     }
 
     @Override
@@ -358,6 +331,9 @@ public class StoryActivity extends BaseActivity {
             story.loc_latitude = location.latitude;
             story.loc_longitude = location.longitude;
             story.loc_name = address.toString();
+
+            if (story.loc_name.isEmpty())
+                story.loc_name = "Unbekannte Adresse";
 
             saveStory();
             updateUi();

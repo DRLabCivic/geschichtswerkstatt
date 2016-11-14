@@ -101,7 +101,11 @@ public class WaveformView extends SurfaceView {
         int colorDelta = 255 / (HISTORY_SIZE + 1);
         int brightness = colorDelta;
 
-        for (int max : mAudioData) {
+        lock.lock();
+        LinkedList<Integer> maxima = (LinkedList<Integer>) mAudioData.clone();
+        lock.unlock();
+
+        for (int max : maxima) {
             mPaint.setColor(strokeColor.getDefaultColor());
             mPaint.setAlpha(brightness);
 
@@ -117,14 +121,14 @@ public class WaveformView extends SurfaceView {
      * Updates the waveform view with a new "frame" of samples and renders it. The new frame gets
      * added to the front of the rendering queue, pushing the previous frames back, causing them to
      * be faded out visually.
-     *
-     * @param buffer the most recent buffer of audio samples
      */
     public synchronized void updateAudioData(int max) {
 
+        lock.lock();
         if (mAudioData.size() >= HISTORY_SIZE)
             mAudioData.removeFirst();
         mAudioData.add(max);
+        lock.unlock();
 
         postInvalidate();
     }

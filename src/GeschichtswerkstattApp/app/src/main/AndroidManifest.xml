@@ -9,7 +9,7 @@
     <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <uses-feature
         android:name="android.hardware.camera"
@@ -49,13 +49,13 @@
             android:parentActivityName=".activities.StoryListActivity" />
         <activity
             android:name=".activities.RecorderActivity"
-            android:theme="@style/FullscreenTheme"
-            android:configChanges="orientation|screenSize"/>
+            android:configChanges="orientation|screenSize"
+            android:theme="@style/FullscreenTheme" />
         <activity
-            android:label="QR Scanner"
             android:name=".activities.ScannerActivity"
-            android:parentActivityName=".activities.MainActivity">
-        </activity>
+            android:label="QR Scanner"
+            android:parentActivityName=".activities.MainActivity"></activity>
+        <activity android:name=".activities.UploadActivity"></activity>
     </application>
 
 </manifest>

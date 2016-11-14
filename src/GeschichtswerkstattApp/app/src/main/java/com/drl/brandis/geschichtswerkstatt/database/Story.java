@@ -49,7 +49,7 @@ public class Story implements Serializable {
 
         List<String> errors = new ArrayList<String>();
 
-        if (title == null || title.length() < 1) {
+        if (title == null || title.length() < 4) {
             errors.add("Titel der Geschichte fehlt.");
         }
 

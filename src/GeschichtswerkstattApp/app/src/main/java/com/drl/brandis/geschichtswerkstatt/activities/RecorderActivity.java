@@ -10,10 +10,14 @@ import android.os.Bundle;
 import android.os.PowerManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import com.drl.brandis.geschichtswerkstatt.R;
 
@@ -31,10 +35,12 @@ public class RecorderActivity extends BaseActivity {
     RecorderState state = RecorderState.INIT;
 
     CountDownTimer timer = null;
+    long recordTime = 0;
 
     SoundRecorder recorder;
     WaveformView waveformView;
     TextView timerView;
+    ProgressBar progressBar;
 
     PowerManager.WakeLock wakeLock;
 
@@ -59,6 +65,7 @@ public class RecorderActivity extends BaseActivity {
 
         timerView = (TextView) findViewById(R.id.elapsed_time);
         waveformView = (WaveformView) findViewById(R.id.waveform_view);
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
 
         // init soundrecorder
         recorder = new SoundRecorderWav(getApplicationContext());
@@ -95,13 +102,18 @@ public class RecorderActivity extends BaseActivity {
     public void startRecording() {
 
         //start Counting Time, set maximum time
-        timer = new CountDownTimer(RECORDING_MAX_TIME, 25) {
+        timer = new CountDownTimer(RECORDING_MAX_TIME - recordTime, 25) {
 
+            long startRecordTime = recordTime;
             long startTime = System.currentTimeMillis();
 
             public void onTick(long millisUntilFinished) {
                 long elapsedTime = System.currentTimeMillis() - startTime;
-                timerView.setText(convertTimeString(elapsedTime));
+                recordTime = startRecordTime + elapsedTime;
+                timerView.setText(convertTimeString(recordTime));
+
+                float progress = recordTime/(float)RECORDING_MAX_TIME;
+                progressBar.setProgress((int)(progress*100));
             }
 
             public void onFinish() {
@@ -149,6 +161,8 @@ public class RecorderActivity extends BaseActivity {
             timer = null;
         }
 
+        recordTime = 0;
+
         try {
             recorder.reset();
             state = RecorderState.INIT;
@@ -178,19 +192,25 @@ public class RecorderActivity extends BaseActivity {
         TextView textView = (TextView) findViewById(R.id.text_view);
         View saveButton = findViewById(R.id.save_button);
         View cancelButton = findViewById(R.id.cancel_button);
+        ToggleButton recordButton = (ToggleButton) findViewById(R.id.record_button);
 
         if (state == RecorderState.RECORDING) {
-            textView.setText("Recording");
+            textView.setText("Aufnahme stoppen");
             saveButton.setVisibility(View.INVISIBLE);
             cancelButton.setVisibility(View.INVISIBLE);
+            recordButton.setChecked(true);
         } else if (state == RecorderState.STOPPED) {
-            textView.setText("Stopped");
+            textView.setText("Aufnahme fortsetzen");
             saveButton.setVisibility(View.VISIBLE);
             cancelButton.setVisibility(View.VISIBLE);
+            recordButton.setChecked(false);
         } else {
-            textView.setText("Ready");
+            textView.setText("Aufnahme starten");
+            progressBar.setProgress(0);
+            timerView.setText(convertTimeString(0));
             saveButton.setVisibility(View.INVISIBLE);
-            cancelButton.setVisibility(View.VISIBLE);
+            cancelButton.setVisibility(View.INVISIBLE);
+            recordButton.setChecked(false);
         }
     }
 
@@ -198,7 +218,6 @@ public class RecorderActivity extends BaseActivity {
         if (state == RecorderState.INIT)
             startRecording();
         else if (state == RecorderState.STOPPED) {
-            resetRecording();
             startRecording();
         } else if (state == RecorderState.RECORDING)
             stopRecording();
@@ -206,6 +225,7 @@ public class RecorderActivity extends BaseActivity {
 
     public void onSaveButtonClicked(View view) {
         if (state == RecorderState.STOPPED) {
+            showOverlay("Aufnahme wird gespeichert",(ViewGroup)findViewById(R.id.main_layout));
             File file = saveRecording();
             if (file != null) {
                 Intent intent = new Intent();
@@ -218,7 +238,7 @@ public class RecorderActivity extends BaseActivity {
     }
 
     public void onCancelButtonClicked(View view) {
-        finish();
+        resetRecording();
     }
 
     private String convertTimeString(long milliseconds) {

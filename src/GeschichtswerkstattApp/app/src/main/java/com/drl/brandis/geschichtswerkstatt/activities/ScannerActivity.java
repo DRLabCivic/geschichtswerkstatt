@@ -28,6 +28,9 @@ public class ScannerActivity extends BaseActivity implements ZXingScannerView.Re
 
     private static final String LOG_TAG = "ScannerActivity";
 
+    private static final String QR_PREFIX = "gpb://";
+    private static final String QR_PREFIX_REPLACEMENT = "http://geschichtswerkstatt.brandis.eu/";
+
     private ZXingScannerView scannerView;
 
     private ScannerState state = ScannerState.SCANNING;
@@ -102,9 +105,6 @@ public class ScannerActivity extends BaseActivity implements ZXingScannerView.Re
 
     @Override
     public void handleResult(Result result) {
-        // Do something with the result here
-        Log.v(LOG_TAG, result.getText()); // Prints scan results
-        Log.v(LOG_TAG, result.getBarcodeFormat().toString()); // Prints the scan format (qrcode, pdf417 etc.)
 
         state = ScannerState.FOUND;
 
@@ -126,10 +126,12 @@ public class ScannerActivity extends BaseActivity implements ZXingScannerView.Re
     public void onLinkButtonClicked(View view) {
 
 
-        if (!linkUrl.startsWith("http://") && !linkUrl.startsWith("https://")) {
-            showAlert("QR Code","Der QR Code beinhaltet keine Url");
+        if (!linkUrl.startsWith(QR_PREFIX)) {
+            showAlert("QR Code","Der QR Code beinhaltet keine Geschichtsplatform Adresse");
             return;
         }
+
+        linkUrl = linkUrl.replace(QR_PREFIX,QR_PREFIX_REPLACEMENT);
 
         Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(linkUrl));
         startActivity(browserIntent);

@@ -62,6 +62,9 @@ public class SoundRecorderWav extends SoundRecorder {
         bufferSize = AudioRecord.getMinBufferSize(sampleRate,RECORDER_CHANNELS,RECORDER_AUDIO_ENCODING);
 
         Log.e(LOG_TAG,"Recorder initialized with sample rate:"+ sampleRate + ", buffer size:"+ bufferSize);
+
+        // clear temporary file
+        deleteTempFile();
     }
 
     @Override
@@ -82,6 +85,9 @@ public class SoundRecorderWav extends SoundRecorder {
 
         //open temp file for writing
         final RandomAccessFile randomAccessWriter = new RandomAccessFile(getTempFile(), "rw");
+
+        //go to end of file
+        randomAccessWriter.seek(randomAccessWriter.length());
 
         recorder.startRecording();
 
@@ -182,7 +188,7 @@ public class SoundRecorderWav extends SoundRecorder {
                 e.printStackTrace();
             }
 
-            bytesRecorded += buffer.length;
+            bytesRecorded += buffer.length*2; //each short contains two bytes
         }
 
         // release hardware
