@@ -204,6 +204,7 @@ public class RecorderActivity extends BaseActivity {
             saveButton.setVisibility(View.VISIBLE);
             cancelButton.setVisibility(View.VISIBLE);
             recordButton.setChecked(false);
+            waveformView.clearAudioData();
         } else {
             textView.setText("Aufnahme starten");
             progressBar.setProgress(0);
@@ -211,6 +212,7 @@ public class RecorderActivity extends BaseActivity {
             saveButton.setVisibility(View.INVISIBLE);
             cancelButton.setVisibility(View.INVISIBLE);
             recordButton.setChecked(false);
+            waveformView.clearAudioData();
         }
     }
 

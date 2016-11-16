@@ -13,6 +13,8 @@ import com.drl.brandis.geschichtswerkstatt.database.Story;
 import com.drl.brandis.geschichtswerkstatt.database.StoryDatabase;
 import com.drl.brandis.geschichtswerkstatt.utils.StoryUploader;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.w3c.dom.Text;
 
 import java.io.IOException;
@@ -63,14 +65,26 @@ public class UploadActivity extends BaseActivity {
                                    Response<ResponseBody> response) {
                 hideOverlay();
 
-                //delete story
-                database.deleteStory(database.getWritableDatabase(), story);
+
+                JSONObject json = new JSONObject();
 
                 try {
-                    Log.e(LOG_TAG,"Upload response: " + response.body().string());
-                } catch (IOException e) {
+                    String string = response.body().string();
+                    Log.e(LOG_TAG,"Upload response: " + string);
+                    json = new JSONObject(string);
+                    if (!json.getBoolean("success")) {
+                        showAlert("Fehler","Upload fehlgeschlagen: "+string, true);
+                        return;
+                    }
+                } catch (Exception e) {
+                    showAlert("Fehler","Upload fehlgeschlagen: "+e.getMessage(), true);
                     e.printStackTrace();
+                    return;
                 }
+
+
+                //delete story
+                database.deleteStory(database.getWritableDatabase(), story);
 
                 //Toast.makeText(getApplicationContext(), "Geschichte " + story.title + " wurde erfolgreich hochgeladen.", Toast.LENGTH_LONG).show();
 

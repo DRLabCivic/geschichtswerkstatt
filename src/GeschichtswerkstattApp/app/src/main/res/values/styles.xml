@@ -81,7 +81,7 @@
     <style name="headerText" parent="normalText">
         <item name="android:padding">@dimen/spacing</item>
         <item name="android:fontFamily">sans-serif-bold</item>
-        <item name="android:textSize">10sp</item>
+        <item name="android:textSize">11sp</item>
         <item name="android:background">@color/colorHeaderBg</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textColor">@color/colorTextLighter</item>

@@ -39,7 +39,7 @@ import static java.util.concurrent.locks.ReentrantReadWriteLock.*;
 public class WaveformView extends SurfaceView {
 
     // The number of buffer frames to keep around (for a nice fade-out visualization).
-    private static final int HISTORY_SIZE = 6;
+    private static final int HISTORY_SIZE = 8;
 
     // To make quieter sounds still show up well on the display, we use +/- 8192 as the amplitude
     // that reaches the top/bottom of the view instead of +/- 32767. Any samples that have
@@ -128,6 +128,14 @@ public class WaveformView extends SurfaceView {
         if (mAudioData.size() >= HISTORY_SIZE)
             mAudioData.removeFirst();
         mAudioData.add(max);
+        lock.unlock();
+
+        postInvalidate();
+    }
+
+    public synchronized void clearAudioData() {
+        lock.lock();
+        mAudioData.clear();
         lock.unlock();
 
         postInvalidate();
