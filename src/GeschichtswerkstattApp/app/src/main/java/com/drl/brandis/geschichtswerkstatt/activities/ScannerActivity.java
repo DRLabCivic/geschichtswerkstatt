@@ -28,7 +28,7 @@ public class ScannerActivity extends BaseActivity implements ZXingScannerView.Re
 
     private static final String LOG_TAG = "ScannerActivity";
 
-    private static final String QR_PREFIX = "gpb://";
+    private static final String QR_PREFIX = "gwb://";
     private static final String QR_PREFIX_REPLACEMENT = "http://geschichtswerkstatt.brandis.eu/";
 
     private ZXingScannerView scannerView;

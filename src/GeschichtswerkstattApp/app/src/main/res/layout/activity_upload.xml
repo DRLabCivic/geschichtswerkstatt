@@ -25,7 +25,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="Geschichte wird hochgeladen..."
+            android:text="Geschichte wird hochgeladen. Dies kann einige Minuten dauern."
             android:textAlignment="center"/>
 
     </LinearLayout>
@@ -48,7 +48,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Geschichte wurde erfolgreich hochgeladen. Die Geschichte wird auf der Geschichtsplatform angezeigt, sobald sie von uns freigeschaltet wurde."/>
+            android:text="Die Geschichte wurde erfolgreich übertragen. Sie wird auf der Geschichtsplatform angezeigt, sobald sie von uns freigeschaltet wurde."/>
 
         <TextView
             android:layout_marginTop="@dimen/spacing"
