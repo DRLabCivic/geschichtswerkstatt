@@ -20,3 +20,12 @@ Android app für die geschichtswerkstatt platform brandis
 QR Code Strings müssen mit dem Prefix `gwb://` starten um erkannt zu werden. Danach folgt der pfad zur geschichte ausgehend von der domain `http://geschichtswerkstatt.brandis.eu/` 
 
 Der QR String `gpb://am-weihnachtsmarkt/` verlinkt also zu `http://geschichtswerkstatt.brandis.eu/am-weihnachtsmarkt/`.
+
+
+
+## TODO
+
+* [ ] Schrift größer machen
+* [ ] Tablet Layout anpassen
+* [ ] Nur Portrait Modus
+* [ ] Geschichte Aufnehmen Button verschwinden lassen nachdem Geschichte aufgenommen wurde
