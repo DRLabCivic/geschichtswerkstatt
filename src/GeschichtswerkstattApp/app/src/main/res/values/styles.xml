@@ -23,6 +23,10 @@
         <!--<item name="android:textColorSecondary">@color/colorTextLight</item>-->
     </style>
 
+    <style name="max_width_600">
+        <item name="android:layout_width">match_parent</item>
+    </style>
+
     <!-- Button Style -->
     <style name="baseButtonStyle">
         <item name="android:background">@drawable/button_gradient</item>
@@ -56,13 +60,13 @@
 
     <!-- Text styles -->
     <style name="normalText">
-        <item name="android:textSize">14sp</item>
+        <item name="android:textSize">16sp</item>
         <item name="android:fontFamily">sans-serif-light</item>
         <item name="android:textStyle">normal</item>
     </style>
 
     <style name="smallTextStyle" parent="normalText">
-        <item name="android:textSize">12sp</item>
+        <item name="android:textSize">13sp</item>
         <item name="android:textColor">@color/colorTextLighter</item>
     </style>
 
@@ -81,7 +85,7 @@
     <style name="headerText" parent="normalText">
         <item name="android:padding">@dimen/spacing</item>
         <item name="android:fontFamily">sans-serif-bold</item>
-        <item name="android:textSize">11sp</item>
+        <item name="android:textSize">12sp</item>
         <item name="android:background">@color/colorHeaderBg</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textColor">@color/colorTextLighter</item>

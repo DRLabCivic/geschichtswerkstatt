@@ -1,0 +1,7 @@
+<resources>
+
+    <style name="max_width_600">
+        <item name="android:layout_width">600dp</item>
+    </style>
+
+</resources>

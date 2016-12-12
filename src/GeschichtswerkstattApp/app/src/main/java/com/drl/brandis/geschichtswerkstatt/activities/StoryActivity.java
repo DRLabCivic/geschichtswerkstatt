@@ -141,6 +141,7 @@ public class StoryActivity extends BaseActivity {
         if (story.audioFile != null) {
             File file = new File(story.audioFile);
             recordingText.setText(file.getName());
+            findViewById(R.id.recordButton).setVisibility(View.GONE);
         }
 
         titleEdit.addTextChangedListener(new TextWatcher() {

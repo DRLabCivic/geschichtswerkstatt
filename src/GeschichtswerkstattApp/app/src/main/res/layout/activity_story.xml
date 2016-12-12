@@ -99,12 +99,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Keine Aufnahme"
-                android:layout_marginTop="@dimen/spacing"
-                android:layout_marginLeft="@dimen/spacing"
-                android:layout_marginRight="@dimen/spacing"/>
+                android:layout_margin="@dimen/spacing"/>
 
 
             <Button
+                android:id="@+id/recordButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/spacing"
@@ -137,9 +136,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Kein Ort ausgewählt"
-                android:layout_marginTop="@dimen/spacing"
-                android:layout_marginLeft="@dimen/spacing"
-                android:layout_marginRight="@dimen/spacing"/>
+                android:layout_margin="@dimen/spacing"/>
 
             <Button
                 android:layout_width="match_parent"

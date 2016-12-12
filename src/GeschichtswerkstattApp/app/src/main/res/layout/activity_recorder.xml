@@ -8,121 +8,130 @@
     android:id="@+id/main_layout"
     tools:context="com.drl.brandis.geschichtswerkstatt.activities.RecorderActivity">
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <RelativeLayout
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:layout_margin="@dimen/padding"
-        android:weightSum="1"
-        android:layout_above="@+id/bottom_layout">
-
-        <com.drl.brandis.geschichtswerkstatt.views.WaveformView
-            android:id="@+id/waveform_view"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_margin="@dimen/spacing"
-            app:canvasBgColor="@color/colorBackground"
-            app:strokeColor="@color/colorPrimary"
-            android:layout_weight="1"/>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="00:00:00"
-            android:id="@+id/elapsed_time"
-            android:textAlignment="center"
-            style="@style/timerText"/>
-
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/spacing">
-
-
-            <ProgressBar
-                style="?android:attr/progressBarStyleHorizontal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:id="@+id/progressBar" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="0 Minuten"
-                android:layout_below="@+id/progressBar"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="5 Minuten"
-                android:layout_below="@+id/progressBar"
-                android:layout_alignParentEnd="true"/>
-
-
-
-        </RelativeLayout>
+        android:layout_centerHorizontal="true"
+        style="@style/max_width_600">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:orientation="vertical"
-            android:layout_margin="@dimen/spacing"
-            android:padding="@dimen/padding"
-            android:onClick="onRecordButtonClicked"
-            android:clickable="true">
+            android:layout_margin="@dimen/padding"
+            android:weightSum="1"
+            android:layout_above="@+id/bottom_layout">
 
-            <ToggleButton
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:textOn=""
-                android:textOff=""
-                android:id="@+id/record_button"
-                android:layout_gravity="center"
-                android:background="@drawable/recordbutton"
-                android:clickable="false"/>
+            <com.drl.brandis.geschichtswerkstatt.views.WaveformView
+                android:id="@+id/waveform_view"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_margin="@dimen/spacing"
+                app:canvasBgColor="@color/colorBackground"
+                app:strokeColor="@color/colorPrimary"
+                android:layout_weight="1"/>
 
             <TextView
-                android:id="@+id/text_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Aufnahme Starten"
-                android:textAlignment="center"/>
+                android:text="00:00:00"
+                android:id="@+id/elapsed_time"
+                android:textAlignment="center"
+                style="@style/timerText"/>
 
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/spacing">
+
+
+                <ProgressBar
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:id="@+id/progressBar" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0 Minuten"
+                    android:layout_below="@+id/progressBar"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="5 Minuten"
+                    android:layout_below="@+id/progressBar"
+                    android:layout_alignParentEnd="true"/>
+
+
+
+            </RelativeLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_margin="@dimen/spacing"
+                android:padding="@dimen/padding"
+                android:onClick="onRecordButtonClicked"
+                android:clickable="true">
+
+                <ToggleButton
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:textOn=""
+                    android:textOff=""
+                    android:id="@+id/record_button"
+                    android:layout_gravity="center"
+                    android:background="@drawable/recordbutton"
+                    android:clickable="false"/>
+
+                <TextView
+                    android:id="@+id/text_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Aufnahme Starten"
+                    android:textAlignment="center"/>
+
+
+            </LinearLayout>
 
         </LinearLayout>
 
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/bottom_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_margin="@dimen/padding">
-
-        <Button
-            android:id="@+id/cancel_button"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/bottom_layout"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Neue&#10;Aufnahme"
-            android:background="@color/colorButtonDark"
-            android:onClick="onCancelButtonClicked"
-            style="@style/textButtonStyle"/>
+            android:layout_alignParentBottom="true"
+            android:layout_margin="@dimen/padding">
+
+            <Button
+                android:id="@+id/cancel_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Neue&#10;Aufnahme"
+                android:background="@color/colorButtonDark"
+                android:onClick="onCancelButtonClicked"
+                style="@style/textButtonStyle"/>
 
 
-        <Button
-            android:id="@+id/save_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Aufnahme&#10;Speichern"
-            android:onClick="onSaveButtonClicked"
-            android:background="@color/colorDone"
-            style="@style/textButtonStyle"/>
+            <Button
+                android:id="@+id/save_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Aufnahme&#10;Speichern"
+                android:onClick="onSaveButtonClicked"
+                android:background="@color/colorDone"
+                style="@style/textButtonStyle"/>
 
-    </LinearLayout>
+        </LinearLayout>
+
+    </RelativeLayout>
+
+
 
 </RelativeLayout>
