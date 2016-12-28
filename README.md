@@ -25,7 +25,7 @@ Der QR String `gpb://am-weihnachtsmarkt/` verlinkt also zu `http://geschichtswer
 
 ## TODO
 
-* [ ] Schrift größer machen
-* [ ] Tablet Layout anpassen
-* [ ] Nur Portrait Modus
-* [ ] Geschichte Aufnehmen Button verschwinden lassen nachdem Geschichte aufgenommen wurde
+* [x] Schrift größer machen
+* [x] Tablet Layout anpassen
+* [x] Nur Portrait Modus
+* [x] Geschichte Aufnehmen Button verschwinden lassen nachdem Geschichte aufgenommen wurde

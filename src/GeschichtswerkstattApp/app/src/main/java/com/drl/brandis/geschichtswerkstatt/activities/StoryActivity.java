@@ -87,7 +87,7 @@ public class StoryActivity extends BaseActivity {
         // request permissions
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, PERMISSIONS_STORAGE, REQUEST_EXTERNAL_STORAGE);
+            ActivityCompat.requestPermissions(this, PERMISSIONS_STORY, REQUEST_STORY_PERMISSIONS);
         }
 
         // setup action bar

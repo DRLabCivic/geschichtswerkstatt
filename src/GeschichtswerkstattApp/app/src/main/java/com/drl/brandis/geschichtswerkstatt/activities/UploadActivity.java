@@ -94,7 +94,7 @@ public class UploadActivity extends BaseActivity {
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
-                showAlert("Fehler","Es konnte keine Verbindung zum Server hergestellt werden.",true);
+                showAlert("Fehler","Es konnte keine Verbindung zum Server hergestellt werden: " + t.getMessage(),true);
             }
         });
     }
